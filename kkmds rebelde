@@ -1,0 +1,144 @@
+-- FPS BOOST + SKY PRETO + UI + WATERMARK RGB SINCRONIZADO
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- =========================
+-- 🔧 OTIMIZAÇÃO GRÁFICA
+-- =========================
+
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("BlurEffect")
+	or v:IsA("SunRaysEffect")
+	or v:IsA("BloomEffect")
+	or v:IsA("DepthOfFieldEffect")
+	or v:IsA("ColorCorrectionEffect") then
+		v:Destroy()
+	end
+end
+
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 1000000
+Lighting.Brightness = 0
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+Lighting.Ambient = Color3.fromRGB(0,0,0)
+Lighting.OutdoorAmbient = Color3.fromRGB(0,0,0)
+
+-- =========================
+-- 🌌 SKY TOTALMENTE PRETO
+-- =========================
+
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("Sky") then
+		v:Destroy()
+	end
+end
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://1012890"
+sky.SkyboxDn = "rbxassetid://1012890"
+sky.SkyboxFt = "rbxassetid://1012890"
+sky.SkyboxLf = "rbxassetid://1012890"
+sky.SkyboxRt = "rbxassetid://1012890"
+sky.SkyboxUp = "rbxassetid://1012890"
+sky.Parent = Lighting
+
+-- =========================
+-- 📊 CONTADOR DE FPS
+-- =========================
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PerformanceUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0, 120, 0, 30)
+fpsLabel.Position = UDim2.new(0, 10, 0, 10)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.new(1,1,1)
+fpsLabel.TextScaled = true
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: 0"
+fpsLabel.Parent = screenGui
+
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= 1 then
+		fpsLabel.Text = "FPS: " .. frames
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- =========================
+-- 🏷️ WATERMARK CORRIGIDA
+-- =========================
+
+local watermarkText = "Rebelde X Dryx"
+local letters = {}
+
+local startX = 0.75 -- posição horizontal
+local startOffsetX = 0
+local startY = 0
+local startOffsetY = 10
+
+local spacing = 18
+
+for i = 1, #watermarkText do
+	local char = string.sub(watermarkText, i, i)
+
+	local letter = Instance.new("TextLabel")
+	letter.Size = UDim2.new(0, 20, 0, 40)
+	letter.Position = UDim2.new(startX, startOffsetX + (i-1)*spacing, startY, startOffsetY)
+	letter.BackgroundTransparency = 1
+	letter.Text = char
+	letter.TextScaled = true
+	letter.Font = Enum.Font.GothamBold
+	letter.Parent = screenGui
+	
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 2
+	stroke.Color = Color3.fromRGB(0,0,0)
+	stroke.Parent = letter
+	
+	table.insert(letters, letter)
+end
+
+local amplitude = 6
+local waveSpeed = 4
+local rgbSpeed = 2
+
+RunService.RenderStepped:Connect(function()
+	local time = tick()
+
+	-- RGB sincronizado
+	local r = math.sin(time * rgbSpeed) * 127 + 128
+	local g = math.sin(time * rgbSpeed + 2) * 127 + 128
+	local b = math.sin(time * rgbSpeed + 4) * 127 + 128
+	local rgbColor = Color3.fromRGB(r, g, b)
+
+	for i, letter in ipairs(letters) do
+		
+		local waveOffset = math.sin(time * waveSpeed + i * 0.5) * amplitude
+		
+		letter.Position = UDim2.new(
+			startX,
+			startOffsetX + (i-1)*spacing,
+			startY,
+			startOffsetY + waveOffset
+		)
+
+		letter.TextColor3 = rgbColor
+	end
+end)
+
+print("FPS Boost + Sky Preto + Watermark corrigida ativado!")
