@@ -1,0 +1,149 @@
+-- 🌌 REBELDE X DRYX HUB FINAL
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"
+
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Blur
+local blur = Instance.new("BlurEffect")
+blur.Size = 15
+blur.Parent = Lighting
+
+-- ================= LOGIN =================
+
+local login = Instance.new("Frame")
+login.Size = UDim2.new(0,420,0,240)
+login.Position = UDim2.new(0.5,-210,0.5,-120)
+login.BackgroundColor3 = Color3.fromRGB(18,18,25)
+login.Parent = gui
+Instance.new("UICorner",login)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,60)
+title.BackgroundTransparency = 1
+title.Text = "REBELDE X DRYX"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.new(1,1,1)
+title.Parent = login
+
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(0.8,0,0,45)
+box.Position = UDim2.new(0.1,0,0.4,0)
+box.PlaceholderText = "Digite a senha..."
+box.Font = Enum.Font.Gotham
+box.TextSize = 16
+box.TextColor3 = Color3.new(1,1,1)
+box.BackgroundColor3 = Color3.fromRGB(30,30,40)
+box.Parent = login
+Instance.new("UICorner",box)
+
+local verify = Instance.new("TextButton")
+verify.Size = UDim2.new(0.8,0,0,45)
+verify.Position = UDim2.new(0.1,0,0.68,0)
+verify.Text = "VERIFICAR"
+verify.Font = Enum.Font.GothamBold
+verify.TextSize = 16
+verify.TextColor3 = Color3.new(1,1,1)
+verify.BackgroundColor3 = Color3.fromRGB(60,120,255)
+verify.Parent = login
+Instance.new("UICorner",verify)
+
+-- ================= HUB =================
+
+local hub = Instance.new("Frame")
+hub.Size = UDim2.new(0,600,0,350)
+hub.Position = UDim2.new(0.5,-300,0.5,-175)
+hub.BackgroundColor3 = Color3.fromRGB(18,18,25)
+hub.Visible = false
+hub.Parent = gui
+Instance.new("UICorner",hub)
+
+local hubTitle = Instance.new("TextLabel")
+hubTitle.Size = UDim2.new(1,0,0,50)
+hubTitle.BackgroundTransparency = 1
+hubTitle.Text = "Performance Settings"
+hubTitle.Font = Enum.Font.GothamBold
+hubTitle.TextSize = 22
+hubTitle.TextColor3 = Color3.new(1,1,1)
+hubTitle.Parent = hub
+
+-- ================= SEU SCRIPT COMO FUNÇÃO =================
+
+local function UltraPotato()
+
+	pcall(function()
+		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+	end)
+
+	Lighting.GlobalShadows = false
+	Lighting.FogEnd = 1e9
+	Lighting.Brightness = 2
+
+	local Terrain = workspace:FindFirstChildOfClass("Terrain")
+	if Terrain then
+		Terrain.WaterTransparency = 1
+	end
+
+	for _, obj in pairs(workspace:GetDescendants()) do
+
+		local model = obj:FindFirstAncestorOfClass("Model")
+		if model and model:FindFirstChildOfClass("Humanoid") then
+			continue
+		end
+
+		if obj:IsA("MeshPart") then
+			obj.RenderFidelity = Enum.RenderFidelity.Performance
+			obj.TextureID = ""
+			obj.Material = Enum.Material.SmoothPlastic
+			obj.CastShadow = false
+		end
+
+		if obj:IsA("BasePart") then
+			obj.Material = Enum.Material.SmoothPlastic
+			obj.CastShadow = false
+		end
+	end
+
+	print("🔥 ULTRA POTATO ATIVADO 🔥")
+end
+
+-- ================= BOTÃO ATIVAR =================
+
+local activate = Instance.new("TextButton")
+activate.Size = UDim2.new(0.6,0,0,50)
+activate.Position = UDim2.new(0.2,0,0.4,0)
+activate.Text = "ATIVAR ULTRA POTATO"
+activate.Font = Enum.Font.GothamBold
+activate.TextSize = 16
+activate.TextColor3 = Color3.new(1,1,1)
+activate.BackgroundColor3 = Color3.fromRGB(40,170,90)
+activate.Parent = hub
+Instance.new("UICorner",activate)
+
+activate.MouseButton1Click:Connect(function()
+	UltraPotato()
+	activate.Text = "ATIVADO ✓"
+end)
+
+-- ================= LOGIN VERIFICAÇÃO =================
+
+verify.MouseButton1Click:Connect(function()
+	if box.Text == SENHA_CORRETA then
+		login.Visible = false
+		hub.Visible = true
+	else
+		verify.Text = "SENHA ERRADA"
+		task.wait(1)
+		verify.Text = "VERIFICAR"
+	end
+end)
