@@ -1,0 +1,165 @@
+-- FPS BOOST + ULTRA DARK MODE + WATERMARK RGB
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- =========================
+-- 🔧 FPS BOOST EXTREMO
+-- =========================
+
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+for _, v in pairs(Lighting:GetChildren()) do
+	v:Destroy()
+end
+
+Lighting.GlobalShadows = false
+Lighting.FogStart = 0
+Lighting.FogEnd = 1000000
+Lighting.Brightness = 0
+Lighting.ClockTime = 0
+Lighting.ExposureCompensation = -5
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+Lighting.Ambient = Color3.fromRGB(0,0,0)
+Lighting.OutdoorAmbient = Color3.fromRGB(0,0,0)
+
+-- Remove Atmosphere se existir
+if Lighting:FindFirstChildOfClass("Atmosphere") then
+	Lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+end
+
+-- =========================
+-- ⚫ SKY ABSOLUTO PRETO
+-- =========================
+
+local blackId = "rbxassetid://1012890"
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = blackId
+sky.SkyboxDn = blackId
+sky.SkyboxFt = blackId
+sky.SkyboxLf = blackId
+sky.SkyboxRt = blackId
+sky.SkyboxUp = blackId
+sky.Parent = Lighting
+
+-- =========================
+-- 🧹 REMOVE PARTÍCULAS E TEXTURAS
+-- =========================
+
+for _, obj in pairs(workspace:GetDescendants()) do
+	
+	if obj:IsA("ParticleEmitter")
+	or obj:IsA("Trail")
+	or obj:IsA("Smoke")
+	or obj:IsA("Fire")
+	or obj:IsA("Sparkles") then
+		obj.Enabled = false
+	end
+
+	if obj:IsA("Decal") or obj:IsA("Texture") then
+		obj:Destroy()
+	end
+
+	if obj:IsA("BasePart") then
+		obj.Material = Enum.Material.SmoothPlastic
+		obj.Reflectance = 0
+	end
+end
+
+-- =========================
+-- 📊 FPS COUNTER
+-- =========================
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PerformanceUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0, 120, 0, 30)
+fpsLabel.Position = UDim2.new(0, 10, 0, 10)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.new(1,1,1)
+fpsLabel.TextScaled = true
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: 0"
+fpsLabel.Parent = screenGui
+
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= 1 then
+		fpsLabel.Text = "FPS: " .. frames
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- =========================
+-- 🏷️ WATERMARK RGB INSANA
+-- =========================
+
+local watermarkText = "Rebelde X Dryx"
+local letters = {}
+
+local startX = 0.7
+local startOffsetX = 0
+local startY = 0
+local startOffsetY = 10
+local spacing = 18
+
+for i = 1, #watermarkText do
+	local char = string.sub(watermarkText, i, i)
+
+	local letter = Instance.new("TextLabel")
+	letter.Size = UDim2.new(0, 20, 0, 40)
+	letter.Position = UDim2.new(startX, startOffsetX + (i-1)*spacing, startY, startOffsetY)
+	letter.BackgroundTransparency = 1
+	letter.Text = char
+	letter.TextScaled = true
+	letter.Font = Enum.Font.GothamBold
+	letter.Parent = screenGui
+	
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 2
+	stroke.Color = Color3.fromRGB(0,0,0)
+	stroke.Parent = letter
+	
+	table.insert(letters, letter)
+end
+
+local amplitude = 6
+local waveSpeed = 4
+local rgbSpeed = 2
+
+RunService.RenderStepped:Connect(function()
+	local time = tick()
+
+	local r = math.sin(time * rgbSpeed) * 127 + 128
+	local g = math.sin(time * rgbSpeed + 2) * 127 + 128
+	local b = math.sin(time * rgbSpeed + 4) * 127 + 128
+	local rgbColor = Color3.fromRGB(r, g, b)
+
+	for i, letter in ipairs(letters) do
+		
+		local waveOffset = math.sin(time * waveSpeed + i * 0.5) * amplitude
+		
+		letter.Position = UDim2.new(
+			startX,
+			startOffsetX + (i-1)*spacing,
+			startY,
+			startOffsetY + waveOffset
+		)
+
+		letter.TextColor3 = rgbColor
+	end
+end)
+
+print("ULTRA DARK MODE ATIVADO 😈")
