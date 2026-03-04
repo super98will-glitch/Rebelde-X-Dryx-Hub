@@ -1,0 +1,135 @@
+-- FPS BOOST + SKY + UI + WATERMARK FLUTUANTE
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- =========================
+-- 🔧 OTIMIZAÇÃO GRÁFICA
+-- =========================
+
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+-- Remove efeitos pesados
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("BlurEffect")
+	or v:IsA("SunRaysEffect")
+	or v:IsA("BloomEffect")
+	or v:IsA("DepthOfFieldEffect")
+	or v:IsA("ColorCorrectionEffect") then
+		v:Destroy()
+	end
+end
+
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 1000000
+Lighting.Brightness = 1
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+
+-- Remove partículas e texturas
+for _, obj in pairs(workspace:GetDescendants()) do
+	if obj:IsA("ParticleEmitter")
+	or obj:IsA("Trail")
+	or obj:IsA("Smoke")
+	or obj:IsA("Fire")
+	or obj:IsA("Sparkles") then
+		obj.Enabled = false
+	end
+
+	if obj:IsA("Decal") or obj:IsA("Texture") then
+		obj:Destroy()
+	end
+
+	if obj:IsA("BasePart") then
+		obj.Material = Enum.Material.Plastic
+		obj.Reflectance = 0
+	end
+end
+
+-- =========================
+-- 🌌 SKY MODIFICADO (LEVE)
+-- =========================
+
+-- Remove sky antigo
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("Sky") then
+		v:Destroy()
+	end
+end
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://159454299"
+sky.SkyboxDn = "rbxassetid://159454296"
+sky.SkyboxFt = "rbxassetid://159454293"
+sky.SkyboxLf = "rbxassetid://159454286"
+sky.SkyboxRt = "rbxassetid://159454300"
+sky.SkyboxUp = "rbxassetid://159454288"
+sky.Parent = Lighting
+
+-- =========================
+-- 📊 CONTADOR DE FPS
+-- =========================
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PerformanceUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0, 120, 0, 30)
+fpsLabel.Position = UDim2.new(0, 10, 0, 10)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.new(1,1,1)
+fpsLabel.TextScaled = true
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: 0"
+fpsLabel.Parent = screenGui
+
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= 1 then
+		fpsLabel.Text = "FPS: " .. frames
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- =========================
+-- 🏷️ WATERMARK "Rebelde X Dryx"
+-- =========================
+
+local watermark = Instance.new("TextLabel")
+watermark.Size = UDim2.new(0, 220, 0, 40)
+watermark.Position = UDim2.new(1, -230, 0, 10)
+watermark.BackgroundTransparency = 1
+watermark.Text = "Rebelde X Dryx"
+watermark.TextColor3 = Color3.fromRGB(180,180,180) -- cinza
+watermark.TextScaled = true
+watermark.Font = Enum.Font.GothamBold
+watermark.Parent = screenGui
+
+-- Borda preta
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(0,0,0)
+stroke.Parent = watermark
+
+-- =========================
+-- 🌀 EFEITO DE FLUTUAÇÃO
+-- =========================
+
+local amplitude = 10 -- pixels de deslocamento
+local speed = 2 -- velocidade da flutuação
+local startPos = watermark.Position
+
+RunService.RenderStepped:Connect(function(dt)
+	local offset = math.sin(tick() * speed) * amplitude
+	watermark.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset, startPos.Y.Scale, startPos.Y.Offset + offset)
+end)
+
+print("Modo FPS Boost + Sky + FPS Counter + Watermark ativado!")
