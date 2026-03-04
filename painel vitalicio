@@ -1,0 +1,187 @@
+-- 🔒 PAINEL + SKY + FPS BOOST + FPS COUNTER + WATERMARK
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local SENHA_CORRETA = "diegomama" -- ALTERE AQUI
+
+-- =========================
+-- 🎮 GUI
+-- =========================
+
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0,300,0,180)
+frame.Position = UDim2.new(0.5,-150,0.5,-90)
+frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+frame.Parent = gui
+frame.Active = true
+frame.Draggable = true
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,40)
+title.BackgroundTransparency = 1
+title.Text = "🔐 Rebelde X Dryx FPS"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.Parent = frame
+
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(0.8,0,0,40)
+box.Position = UDim2.new(0.1,0,0.4,0)
+box.PlaceholderText = "Digite a senha"
+box.Text = ""
+box.TextColor3 = Color3.fromRGB(255,255,255)
+box.BackgroundColor3 = Color3.fromRGB(30,30,30)
+box.Font = Enum.Font.Gotham
+box.TextSize = 18
+box.Parent = frame
+Instance.new("UICorner", box)
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0.6,0,0,35)
+button.Position = UDim2.new(0.2,0,0.75,0)
+button.Text = "ATIVAR"
+button.BackgroundColor3 = Color3.fromRGB(0,170,255)
+button.TextColor3 = Color3.fromRGB(255,255,255)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 16
+button.Parent = frame
+Instance.new("UICorner", button)
+
+-- =========================
+-- 📊 FPS COUNTER
+-- =========================
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0,120,0,30)
+fpsLabel.Position = UDim2.new(0,10,0,10)
+fpsLabel.BackgroundTransparency = 0.3
+fpsLabel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+fpsLabel.TextColor3 = Color3.fromRGB(0,255,0)
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.TextSize = 16
+fpsLabel.Visible = false
+fpsLabel.Parent = gui
+Instance.new("UICorner", fpsLabel)
+
+-- FPS cálculo real
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= 1 then
+		fpsLabel.Text = "FPS: "..frames
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- =========================
+-- 💧 WATERMARK
+-- =========================
+
+local watermark = Instance.new("TextLabel")
+watermark.Size = UDim2.new(0,250,0,30)
+watermark.Position = UDim2.new(1,-260,0,10)
+watermark.BackgroundTransparency = 1
+watermark.Text = "REBELDE E DRYX HUB"
+watermark.TextColor3 = Color3.fromRGB(255,255,255)
+watermark.TextTransparency = 0.6 -- quase transparente
+watermark.Font = Enum.Font.GothamBold
+watermark.TextSize = 18
+watermark.Visible = false
+watermark.Parent = gui
+
+-- =========================
+-- 🚀 FUNÇÃO PRINCIPAL
+-- =========================
+
+local function ativarScript()
+
+	-- SKY PADRÃO
+	for _, v in pairs(Lighting:GetChildren()) do
+		if v:IsA("Sky") then
+			v:Destroy()
+		end
+	end
+
+	local sky = Instance.new("Sky")
+	sky.SkyboxBk = "rbxassetid://159454299"
+	sky.SkyboxDn = "rbxassetid://159454296"
+	sky.SkyboxFt = "rbxassetid://159454293"
+	sky.SkyboxLf = "rbxassetid://159454286"
+	sky.SkyboxRt = "rbxassetid://159454300"
+	sky.SkyboxUp = "rbxassetid://159454288"
+	sky.Parent = Lighting
+
+	-- FPS BOOST
+	settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+	for _, v in pairs(Lighting:GetChildren()) do
+		if v:IsA("BlurEffect")
+		or v:IsA("SunRaysEffect")
+		or v:IsA("BloomEffect")
+		or v:IsA("DepthOfFieldEffect")
+		or v:IsA("ColorCorrectionEffect") then
+			v:Destroy()
+		end
+	end
+
+	Lighting.GlobalShadows = false
+	Lighting.FogEnd = 1000000
+	Lighting.Brightness = 1
+	Lighting.EnvironmentDiffuseScale = 0
+	Lighting.EnvironmentSpecularScale = 0
+
+	for _, obj in pairs(workspace:GetDescendants()) do
+
+		if obj:IsA("ParticleEmitter")
+		or obj:IsA("Trail")
+		or obj:IsA("Smoke")
+		or obj:IsA("Fire")
+		or obj:IsA("Sparkles") then
+			obj.Enabled = false
+		end
+
+		if obj:IsA("Decal") or obj:IsA("Texture") then
+			obj:Destroy()
+		end
+
+		if obj:IsA("BasePart") then
+			obj.Material = Enum.Material.Plastic
+			obj.Reflectance = 0
+			obj.CastShadow = false
+		end
+	end
+
+	-- Ativar UI extra
+	fpsLabel.Visible = true
+	watermark.Visible = true
+
+	frame.Visible = false
+	print("🔥 FPS BOOST ATIVADO 100%")
+end
+
+-- =========================
+-- 🔑 SENHA
+-- =========================
+
+button.MouseButton1Click:Connect(function()
+	if box.Text == SENHA_CORRETA then
+		ativarScript()
+	else
+		button.Text = "SENHA ERRADA"
+		wait(1)
+		button.Text = "ATIVAR"
+	end
+end)
