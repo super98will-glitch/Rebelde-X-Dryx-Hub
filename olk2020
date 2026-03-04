@@ -1,0 +1,224 @@
+-- PAINEL DE SENHA ESTILIZADO + FPS + SKY PRETO + WATERMARK RGB ULTRA (FIXADO)
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local correctPassword = "rebelde"
+
+-- =========================
+-- 🔑 PAINEL DE SENHA ESTILIZADO
+-- =========================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PasswordUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0,0,0,0)
+frame.Position = UDim2.new(0.5,0,0.5,0)
+frame.AnchorPoint = Vector2.new(0.5,0.5)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.BackgroundTransparency = 0.2
+frame.BorderSizePixel = 0
+frame.ClipsDescendants = true
+frame.Parent = screenGui
+
+local uicorner = Instance.new("UICorner")
+uicorner.CornerRadius = UDim.new(0,15)
+uicorner.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,40)
+title.Position = UDim2.new(0,0,0,0)
+title.BackgroundTransparency = 1
+title.Text = "Digite a senha"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.Parent = frame
+
+local titleStroke = Instance.new("UIStroke")
+titleStroke.Thickness = 2
+titleStroke.Color = Color3.fromRGB(0,255,255)
+titleStroke.Parent = title
+
+local textbox = Instance.new("TextBox")
+textbox.Size = UDim2.new(0.8,0,0,40)
+textbox.Position = UDim2.new(0.1,0,0.4,0)
+textbox.BackgroundColor3 = Color3.fromRGB(40,40,40)
+textbox.TextColor3 = Color3.fromRGB(255,255,255)
+textbox.Font = Enum.Font.Gotham
+textbox.PlaceholderText = "Senha"
+textbox.ClearTextOnFocus = true
+textbox.TextScaled = true
+textbox.Parent = frame
+
+local textCorner = Instance.new("UICorner")
+textCorner.CornerRadius = UDim.new(0,8)
+textCorner.Parent = textbox
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0.5,0,0,35)
+button.Position = UDim2.new(0.25,0,0.7,0)
+button.BackgroundColor3 = Color3.fromRGB(0,150,255)
+button.TextColor3 = Color3.fromRGB(255,255,255)
+button.Font = Enum.Font.GothamBold
+button.TextScaled = true
+button.Text = "Confirmar"
+button.Parent = frame
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0,8)
+buttonCorner.Parent = button
+
+button.MouseEnter:Connect(function()
+	button.BackgroundColor3 = Color3.fromRGB(0,200,255)
+end)
+button.MouseLeave:Connect(function()
+	button.BackgroundColor3 = Color3.fromRGB(0,150,255)
+end)
+
+TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0,300,0,150)}):Play()
+
+-- =========================
+-- 🔓 FUNÇÃO PARA ATIVAR SCRIPT
+-- =========================
+local function activateScript()
+	screenGui:Destroy()
+
+	-- 🔧 FORÇAR LOW POLY / GRÁFICOS MÍNIMOS
+	game:GetService("RunService").Set3dRenderingEnabled = true
+	settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+	-- Destrói efeitos 
+	for _, v in pairs(Lighting:GetChildren()) do
+		if v:IsA("BlurEffect")
+		or v:IsA("SunRaysEffect")
+		or v:IsA("BloomEffect")
+		or v:IsA("DepthOfFieldEffect")
+		or v:IsA("ColorCorrectionEffect")
+		or v:IsA("Atmosphere") then
+			v:Destroy()
+		end
+	end
+
+	-- =========================
+	-- 🌌 SKY PRETO DE VERDADE
+	-- =========================
+	-- Remove qualquer sky
+	for _, v in pairs(Lighting:GetChildren()) do
+		if v:IsA("Sky") then
+			v:Destroy()
+		end
+	end
+
+	-- Cria Sky preto definitivo
+	local blackSky = Instance.new("Sky")
+	local blackId = "rbxassetid://1012890"
+	blackSky.SkyboxBk = blackId
+	blackSky.SkyboxDn = blackId
+	blackSky.SkyboxFt = blackId
+	blackSky.SkyboxLf = blackId
+	blackSky.SkyboxRt = blackId
+	blackSky.SkyboxUp = blackId
+	blackSky.Parent = Lighting
+
+	-- Impede que o jogo altere o sky depois
+	Lighting:GetPropertyChangedSignal("SkyboxBk"):Connect(function()
+		Lighting.SkyboxBk = blackId
+	end)
+	Lighting:GetPropertyChangedSignal("SkyboxUp"):Connect(function()
+		Lighting.SkyboxUp = blackId
+	end)
+
+	-- =========================
+	-- 📊 FPS COUNTER
+	-- =========================
+	local fpsLabel = Instance.new("TextLabel")
+	fpsLabel.Size = UDim2.new(0,120,0,30)
+	fpsLabel.Position = UDim2.new(0,10,0,10)
+	fpsLabel.BackgroundTransparency = 1
+	fpsLabel.TextColor3 = Color3.new(1,1,1)
+	fpsLabel.TextScaled = true
+	fpsLabel.Font = Enum.Font.GothamBold
+	fpsLabel.Text = "FPS: 0"
+	fpsLabel.Parent = player.PlayerGui
+
+	local frames = 0
+	local lastTime = tick()
+
+	RunService.RenderStepped:Connect(function()
+		frames += 1
+		if tick() - lastTime >= 1 then
+			fpsLabel.Text = "FPS: " .. frames
+			frames = 0
+			lastTime = tick()
+		end
+	end)
+
+	-- 🏷️ WATERMARK RGB ULTRA
+	local watermarkText = "Rebelde X Dryx"
+	local letters = {}
+	local startX, startY, startOffsetY, spacing = 0.75, 0, 10, 18
+
+	for i = 1, #watermarkText do
+		local char = string.sub(watermarkText,i,i)
+		local letter = Instance.new("TextLabel")
+		letter.Size = UDim2.new(0,20,0,40)
+		letter.Position = UDim2.new(startX,(i-1)*spacing,startY,startOffsetY)
+		letter.BackgroundTransparency = 1
+		letter.Text = char
+		letter.TextScaled = true
+		letter.Font = Enum.Font.GothamBold
+		letter.Parent = player.PlayerGui
+
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 2
+		stroke.Color = Color3.fromRGB(0,0,0)
+		stroke.Parent = letter
+
+		local glow = Instance.new("UIStroke")
+		glow.Thickness = 4
+		glow.Color = Color3.fromRGB(0,255,255)
+		glow.Parent = letter
+
+		table.insert(letters,{label=letter,glow=glow})
+	end
+
+	local amplitude, waveSpeed, rgbSpeed, glowSpeed = 6, 4, 2, 5
+
+	RunService.RenderStepped:Connect(function()
+		local time = tick()
+		local r = math.sin(time*rgbSpeed)*127+128
+		local g = math.sin(time*rgbSpeed+2)*127+128
+		local b = math.sin(time*rgbSpeed+4)*127+128
+		local rgbColor = Color3.fromRGB(r,g,b)
+
+		local glowIntensity = (math.sin(time*glowSpeed)*0.5 + 0.5) * 4 + 2
+
+		for i,obj in ipairs(letters) do
+			local waveOffset = math.sin(time*waveSpeed + i*0.5)*amplitude
+			obj.label.Position = UDim2.new(startX,(i-1)*spacing,startY,startOffsetY+waveOffset)
+			obj.label.TextColor3 = rgbColor
+			obj.glow.Color = rgbColor
+			obj.glow.Thickness = glowIntensity
+		end
+	end)
+
+	print("SCRIPT ATIVADO COM SKY PRETO FIXADO!")
+end
+
+-- =========================
+-- ✅ BOTÃO CONFIRMAR
+-- =========================
+button.MouseButton1Click:Connect(function()
+	if textbox.Text == correctPassword then
+		activateScript()
+	else
+		textbox.Text = ""
+		textbox.PlaceholderText = "Senha incorreta!"
+	end
+end)
