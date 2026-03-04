@@ -1,0 +1,83 @@
+-- ☠️ PVP GOD MODE (EXTREME FPS)
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- =========================
+-- 🔥 GRÁFICOS NO MÍNIMO
+-- =========================
+
+pcall(function()
+	settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+end)
+
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 9e9
+Lighting.Brightness = 1
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+
+for _,v in pairs(Lighting:GetChildren()) do
+	v:Destroy()
+end
+
+-- =========================
+-- 💀 REMOVE TUDO QUE NÃO FOR PLAYER
+-- =========================
+
+local function isPlayerCharacter(obj)
+	return obj:FindFirstChildOfClass("Humanoid") ~= nil
+end
+
+for _,v in pairs(workspace:GetDescendants()) do
+	
+	-- Mantém jogadores
+	if v:IsA("Model") and isPlayerCharacter(v) then
+		continue
+	end
+	
+	-- Mantém chão grande ancorado
+	if v:IsA("BasePart") then
+		if v.Anchored and v.Size.Y < 10 and v.Size.Magnitude > 20 then
+			v.Material = Enum.Material.SmoothPlastic
+			v.CastShadow = false
+			continue
+		end
+	end
+	
+	-- Remove resto
+	if not v:IsDescendantOf(player.Character) then
+		pcall(function()
+			v:Destroy()
+		end)
+	end
+end
+
+-- =========================
+-- 🎯 DESTACA PLAYERS
+-- =========================
+
+local function highlightCharacter(char)
+	if char:FindFirstChild("HumanoidRootPart") then
+		local h = Instance.new("Highlight")
+		h.FillTransparency = 1
+		h.OutlineColor = Color3.fromRGB(255,0,0)
+		h.Parent = char
+	end
+end
+
+for _,plr in pairs(Players:GetPlayers()) do
+	if plr ~= player and plr.Character then
+		highlightCharacter(plr.Character)
+	end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function(char)
+		highlightCharacter(char)
+	end)
+end)
+
+print("☠️ PVP GOD MODE ATIVADO ☠️")
