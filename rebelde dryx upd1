@@ -1,0 +1,160 @@
+-- FPS BOOST + SKY + UI + WATERMARK RGB ONDA
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- =========================
+-- 🔧 OTIMIZAÇÃO GRÁFICA
+-- =========================
+
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("BlurEffect")
+	or v:IsA("SunRaysEffect")
+	or v:IsA("BloomEffect")
+	or v:IsA("DepthOfFieldEffect")
+	or v:IsA("ColorCorrectionEffect") then
+		v:Destroy()
+	end
+end
+
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 1000000
+Lighting.Brightness = 1
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+
+for _, obj in pairs(workspace:GetDescendants()) do
+	if obj:IsA("ParticleEmitter")
+	or obj:IsA("Trail")
+	or obj:IsA("Smoke")
+	or obj:IsA("Fire")
+	or obj:IsA("Sparkles") then
+		obj.Enabled = false
+	end
+
+	if obj:IsA("Decal") or obj:IsA("Texture") then
+		obj:Destroy()
+	end
+
+	if obj:IsA("BasePart") then
+		obj.Material = Enum.Material.Plastic
+		obj.Reflectance = 0
+	end
+end
+
+-- =========================
+-- 🌌 SKY MODIFICADO (LEVE)
+-- =========================
+
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("Sky") then
+		v:Destroy()
+	end
+end
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://159454299"
+sky.SkyboxDn = "rbxassetid://159454296"
+sky.SkyboxFt = "rbxassetid://159454293"
+sky.SkyboxLf = "rbxassetid://159454286"
+sky.SkyboxRt = "rbxassetid://159454300"
+sky.SkyboxUp = "rbxassetid://159454288"
+sky.Parent = Lighting
+
+-- =========================
+-- 📊 CONTADOR DE FPS
+-- =========================
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PerformanceUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0, 120, 0, 30)
+fpsLabel.Position = UDim2.new(0, 10, 0, 10)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.new(1,1,1)
+fpsLabel.TextScaled = true
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: 0"
+fpsLabel.Parent = screenGui
+
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= 1 then
+		fpsLabel.Text = "FPS: " .. frames
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- =========================
+-- 🏷️ WATERMARK RGB + ONDA
+-- =========================
+
+local watermarkText = "Rebelde X Dryx"
+local letters = {}
+
+local baseX = 1
+local baseOffsetX = -230
+local baseY = 0
+local baseOffsetY = 10
+local spacing = 14
+
+for i = 1, #watermarkText do
+	local char = string.sub(watermarkText, i, i)
+
+	local letter = Instance.new("TextLabel")
+	letter.Size = UDim2.new(0, 20, 0, 40)
+	letter.Position = UDim2.new(baseX, baseOffsetX + (i-1)*spacing, baseY, baseOffsetY)
+	letter.BackgroundTransparency = 1
+	letter.Text = char
+	letter.TextScaled = true
+	letter.Font = Enum.Font.GothamBold
+	letter.Parent = screenGui
+	
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 2
+	stroke.Color = Color3.fromRGB(0,0,0)
+	stroke.Parent = letter
+	
+	table.insert(letters, letter)
+end
+
+local amplitude = 6
+local waveSpeed = 4
+local rgbSpeed = 2
+
+RunService.RenderStepped:Connect(function()
+	local time = tick()
+	
+	for i, letter in ipairs(letters) do
+		
+		-- 🌊 Onda esquerda → direita
+		local waveOffset = math.sin(time * waveSpeed + i * 0.5) * amplitude
+		
+		letter.Position = UDim2.new(
+			baseX,
+			baseOffsetX + (i-1)*spacing,
+			baseY,
+			baseOffsetY + waveOffset
+		)
+		
+		-- 🎨 RGB animado
+		local r = math.sin(time * rgbSpeed + i) * 127 + 128
+		local g = math.sin(time * rgbSpeed + i + 2) * 127 + 128
+		local b = math.sin(time * rgbSpeed + i + 4) * 127 + 128
+		
+		letter.TextColor3 = Color3.fromRGB(r, g, b)
+	end
+end)
+
+print("Modo FPS Boost + Sky + FPS Counter + Watermark RGB ativado!")
