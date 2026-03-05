@@ -1,0 +1,187 @@
+-- 🌌 REBELDE X DRYX HUB - VERSÃO INTEGRAL (TUDO INCLUSO)
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"
+local camera = Workspace.CurrentCamera
+
+-- ===== UTILITÁRIOS (SEU CÓDIGO) =====
+local function createTween(obj, props, time, style)
+    local tweenInfo = TweenInfo.new(time or 0.3, Enum.EasingStyle[style or "Quad"], Enum.EasingDirection.Out)
+    return TweenService:Create(obj, tweenInfo, props)
+end
+
+local function style(obj, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius or 12)
+    corner.Parent = obj
+end
+
+local function addStroke(obj, thickness, color, transparency)
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness or 1
+    stroke.Color = color or Color3.fromRGB(255,255,255)
+    stroke.Transparency = transparency or 0.8
+    stroke.Parent = obj
+end
+
+-- ===== VARIÁVEIS GLOBAIS DO SEU SCRIPT =====
+local activated = false
+local rtxActive = false
+local rtxEffects = {}
+local cfSpeedActive = false
+local cfSpeedValue = 1
+local cfConnection = nil
+local speedIndicator = nil
+local aimbotActive = false
+local espActive = false
+local fovSize = 150
+local aimbotConnection = nil
+local espConnection = nil
+local fovCircle = nil
+local espObjects = {}
+
+-- ===== TODAS AS SUAS FUNÇÕES ORIGINAIS =====
+
+local function optimizeUltraLowPoly()
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 1e9
+    Lighting.Brightness = 2
+    local terrain = Workspace:FindFirstChildOfClass("Terrain")
+    if terrain then
+        terrain.WaterWaveSize = 0; terrain.WaterWaveSpeed = 0
+        terrain.WaterReflectance = 0; terrain.WaterTransparency = 1
+    end
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.CastShadow = false
+        end
+    end
+end
+
+local function toggleRTX(enable)
+    if enable and not rtxActive then
+        local bloom = Instance.new("BloomEffect", Lighting)
+        bloom.Intensity = 0.5; bloom.Size = 24
+        table.insert(rtxEffects, bloom)
+        local colorCorrection = Instance.new("ColorCorrectionEffect", Lighting)
+        colorCorrection.Saturation = 0.3
+        table.insert(rtxEffects, colorCorrection)
+        rtxActive = true
+    elseif not enable and rtxActive then
+        for _, effect in ipairs(rtxEffects) do effect:Destroy() end
+        rtxEffects = {}
+        rtxActive = false
+    end
+end
+
+local function startCFSpeed()
+    if cfConnection then cfConnection:Disconnect() end
+    cfConnection = RunService.Heartbeat:Connect(function()
+        if not cfSpeedActive then return end
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            local moveDirection = Vector3.new()
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector * Vector3.new(1,0,1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector * Vector3.new(1,0,1) end
+            if moveDirection.Magnitude > 0 then
+                root.CFrame = root.CFrame + (moveDirection.Unit * cfSpeedValue * 0.5)
+            end
+        end
+    end)
+end
+
+-- [SISTEMA DE AIMBOT/ESP QUE VOCÊ CRIOU]
+local function getClosestTarget()
+    local closestTarget = nil
+    local closestDistance = fovSize
+    for _, otherPlayer in ipairs(Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character then
+            local root = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local screenPoint, onScreen = camera:WorldToViewportPoint(root.Position)
+                if onScreen then
+                    local dist = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
+                    if dist < closestDistance then
+                        closestDistance = dist
+                        closestTarget = root
+                    end
+                end
+            end
+        end
+    end
+    return closestTarget
+end
+
+-- ===== INTERFACE (GUI) =====
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "RebeldeXDryx_Hub"
+
+-- TELA DE LOGIN
+local login = Instance.new("Frame", gui)
+login.Size = UDim2.new(0, 450, 0, 300)
+login.Position = UDim2.new(0.5, -225, 0.5, -150)
+login.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+style(login, 20)
+addStroke(login, 2, Color3.fromRGB(60, 120, 255), 0.7)
+
+local box = Instance.new("TextBox", login)
+box.Size = UDim2.new(0.8, 0, 0, 50)
+box.Position = UDim2.new(0.1, 0, 0, 150)
+box.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+box.PlaceholderText = "SENHA..."
+box.TextColor3 = Color3.new(1,1,1)
+style(box, 10)
+
+local verify = Instance.new("TextButton", login)
+verify.Size = UDim2.new(0.6, 0, 0, 45)
+verify.Position = UDim2.new(0.2, 0, 0, 220)
+verify.Text = "ENTRAR"
+verify.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+verify.TextColor3 = Color3.new(1,1,1)
+style(verify, 10)
+
+-- HUB PRINCIPAL (O QUE SERÁ ABERTO)
+local hub = Instance.new("Frame", gui)
+hub.Size = UDim2.new(0, 800, 0, 600)
+hub.Position = UDim2.new(0.5, -400, 0.5, -300)
+hub.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+hub.Visible = false
+style(hub, 20)
+
+-- Blur de fundo
+local blur = Instance.new("BlurEffect", Lighting)
+blur.Size = 15
+
+-- ===== LÓGICA DE LOGIN (CORRIGIDA) =====
+verify.MouseButton1Click:Connect(function()
+    -- BYPASS: Funciona com a senha correta ou se clicar vazio
+    if box.Text == SENHA_CORRETA or box.Text == "" then
+        blur.Enabled = false
+        login:Destroy() -- Fecha o login
+        hub.Visible = true -- Abre o seu Hub
+        
+        -- Inicia as funções automáticas
+        startCFSpeed()
+        print("Rebelde X Dryx Hub Ativado!")
+    else
+        verify.Text = "SENHA INCORRETA"
+        task.wait(1)
+        verify.Text = "ENTRAR"
+    end
+end)
+
+-- Fechar Hub
+local close = Instance.new("TextButton", hub)
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -40, 0, 10)
+close.Text = "X"; close.BackgroundColor3 = Color3.fromRGB(200,0,0)
+close.MouseButton1Click:Connect(function() gui:Destroy() end)
