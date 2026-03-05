@@ -1,0 +1,775 @@
+-- 🌌 REBELDE X DRYX HUB - VERSÃO OTIMIZADA
+-- Design Profissional com Abas e Efeitos Modernos
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"  -- 🔑 SENHA DE LOGIN
+local camera = Workspace.CurrentCamera
+
+-- ===== UTILITÁRIOS =====
+local function createTween(obj, props, time, style)
+	local tweenInfo = TweenInfo.new(
+		time or 0.3,
+		Enum.EasingStyle[style or "Quad"],
+		Enum.EasingDirection.Out
+	)
+	return TweenService:Create(obj, tweenInfo, props)
+end
+
+local function style(obj, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 12)
+	corner.Parent = obj
+end
+
+local function addStroke(obj, thickness, color, transparency)
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = thickness or 1
+	stroke.Color = color or Color3.fromRGB(255,255,255)
+	stroke.Transparency = transparency or 0.8
+	stroke.Parent = obj
+end
+
+-- ===== WATERMARK PROFISSIONAL =====
+local infoGui = Instance.new("ScreenGui")
+infoGui.Name = "RebeldeXDryx_Info"
+infoGui.IgnoreGuiInset = true
+infoGui.ResetOnSpawn = false
+infoGui.Parent = player:WaitForChild("PlayerGui")
+
+local watermark = Instance.new("Frame")
+watermark.Size = UDim2.new(0, 220, 0, 50)
+watermark.Position = UDim2.new(1, -240, 0, 20)
+watermark.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+watermark.BackgroundTransparency = 0.2
+watermark.Parent = infoGui
+style(watermark, 10)
+addStroke(watermark, 1, Color3.fromRGB(60, 120, 255), 0.5)
+
+local logo = Instance.new("ImageLabel")
+logo.Size = UDim2.new(0, 30, 0, 30)
+logo.Position = UDim2.new(0, 10, 0.5, -15)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://4483345998"
+logo.ImageColor3 = Color3.fromRGB(60, 120, 255)
+logo.Parent = watermark
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -50, 0, 20)
+title.Position = UDim2.new(0, 45, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "REBELDE X DRYX"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = watermark
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(1, -50, 0, 16)
+fpsLabel.Position = UDim2.new(0, 45, 0, 26)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.Text = "FPS: 0 | Ping: 0ms"
+fpsLabel.Font = Enum.Font.Gotham
+fpsLabel.TextSize = 12
+fpsLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+fpsLabel.Parent = watermark
+
+RunService.RenderStepped:Connect(function(dt)
+	local fps = math.floor(1 / dt)
+	local ping = math.floor(player:GetNetworkPing() * 1000)
+	fpsLabel.Text = "FPS: " .. fps .. " | Ping: " .. ping .. "ms"
+end)
+
+-- ===== BLUR EFFECT =====
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("BlurEffect") then v:Destroy() end
+end
+
+local blur = Instance.new("BlurEffect")
+blur.Size = 15
+blur.Enabled = false
+blur.Parent = Lighting
+
+-- ===== GUI PRINCIPAL =====
+local gui = Instance.new("ScreenGui")
+gui.Name = "RebeldeXDryx_Hub"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- ===== VARIÁVEIS GLOBAIS =====
+local activated = false
+local rtxActive = false
+local rtxEffects = {}
+local cfSpeedActive = false
+local cfSpeedValue = 1
+local cfConnection = nil
+local speedIndicator = nil
+local aimbotActive = false
+local espActive = false
+local fovSize = 150
+local aimbotConnection = nil
+local espConnection = nil
+local fovCircle = nil
+local espObjects = {}
+
+-- ===== FUNÇÕES BASE =====
+local function isCharacter(model)
+	return model:FindFirstChildOfClass("Humanoid") ~= nil
+end
+
+-- Função Ultra Low Poly
+local function optimizeUltraLowPoly()
+	Lighting.GlobalShadows = false
+	Lighting.FogEnd = 1e9
+	Lighting.Brightness = 2
+
+	local terrain = Workspace:FindFirstChildOfClass("Terrain")
+	if terrain then
+		terrain.WaterWaveSize = 0
+		terrain.WaterWaveSpeed = 0
+		terrain.WaterReflectance = 0
+		terrain.WaterTransparency = 1
+	end
+
+	for _, obj in pairs(Workspace:GetDescendants()) do
+		if obj:IsA("Terrain") then continue end
+		local model = obj:FindFirstAncestorOfClass("Model")
+		if model and isCharacter(model) then
+			for _, part in pairs(model:GetDescendants()) do
+				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+					local originalTrans = part.Transparency
+					part.Material = Enum.Material.SmoothPlastic
+					part.Reflectance = 0
+					part.CastShadow = false
+					part.Transparency = originalTrans
+				end
+			end
+			continue
+		end
+		if obj:IsA("BasePart") and obj.Anchored and obj.CanCollide then
+			obj.Material = Enum.Material.SmoothPlastic
+			obj.Reflectance = 0
+			obj.CastShadow = false
+			obj.Transparency = 0
+			continue
+		end
+		if obj.Name:lower():match("tree") or obj.Name:lower():match("rock") then
+			obj:Destroy()
+		elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+			obj.Enabled = false
+		elseif obj:IsA("BasePart") then
+			obj:Destroy()
+		end
+	end
+end
+
+-- Função RTX
+local function toggleRTX(enable)
+	if enable and not rtxActive then
+		local bloom = Instance.new("BloomEffect")
+		bloom.Intensity = 0.5
+		bloom.Size = 24
+		bloom.Threshold = 2
+		bloom.Parent = Lighting
+		table.insert(rtxEffects, bloom)
+		
+		local colorCorrection = Instance.new("ColorCorrectionEffect")
+		colorCorrection.Brightness = 0.1
+		colorCorrection.Contrast = 0.2
+		colorCorrection.Saturation = 0.3
+		colorCorrection.TintColor = Color3.fromRGB(255, 240, 220)
+		colorCorrection.Parent = Lighting
+		table.insert(rtxEffects, colorCorrection)
+		
+		local sunRays = Instance.new("SunRaysEffect")
+		sunRays.Intensity = 0.1
+		sunRays.Spread = 0.5
+		sunRays.Parent = Lighting
+		table.insert(rtxEffects, sunRays)
+		
+		local depthOfField = Instance.new("DepthOfFieldEffect")
+		depthOfField.FarIntensity = 0.5
+		depthOfField.FocusDistance = 30
+		depthOfField.InFocusRadius = 20
+		depthOfField.NearIntensity = 0.5
+		depthOfField.Parent = Lighting
+		table.insert(rtxEffects, depthOfField)
+		
+		Lighting.Ambient = Color3.fromRGB(40, 40, 50)
+		Lighting.Brightness = 1.5
+		Lighting.ColorShift_Bottom = Color3.fromRGB(20, 20, 30)
+		Lighting.ColorShift_Top = Color3.fromRGB(220, 200, 180)
+		Lighting.EnvironmentDiffuseScale = 0.5
+		Lighting.EnvironmentSpecularScale = 0.5
+		Lighting.GlobalShadows = true
+		Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 120)
+		Lighting.ShadowSoftness = 0.2
+		
+		rtxActive = true
+		
+	elseif not enable and rtxActive then
+		for _, effect in ipairs(rtxEffects) do
+			effect:Destroy()
+		end
+		rtxEffects = {}
+		
+		Lighting.Ambient = Color3.new(0, 0, 0)
+		Lighting.Brightness = 2
+		Lighting.ColorShift_Bottom = Color3.new(0, 0, 0)
+		Lighting.ColorShift_Top = Color3.new(0, 0, 0)
+		Lighting.EnvironmentDiffuseScale = 1
+		Lighting.EnvironmentSpecularScale = 1
+		Lighting.GlobalShadows = false
+		Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+		Lighting.ShadowSoftness = 0
+		
+		rtxActive = false
+	end
+end
+
+-- ================= HUB PRINCIPAL =================
+local hub = Instance.new("Frame")
+hub.Size = UDim2.new(0, 0, 0, 0)
+hub.Position = UDim2.new(0.5, -400, 0.5, -300)
+hub.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+hub.ClipsDescendants = true
+hub.Visible = false
+hub.Parent = gui
+style(hub, 20)
+addStroke(hub, 2, Color3.fromRGB(60, 120, 255), 0.7)
+
+-- Gradient do hub
+local hubGradient = Instance.new("UIGradient")
+hubGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 28)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 8, 14))
+})
+hubGradient.Rotation = 45
+hubGradient.Parent = hub
+
+-- ===== TOP BAR =====
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 60)
+topBar.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+topBar.Parent = hub
+style(topBar, 20)
+
+-- Só as bordas superiores arredondadas
+local topBarCorner = Instance.new("UICorner")
+topBarCorner.CornerRadius = UDim.new(0, 20)
+topBarCorner.Parent = topBar
+
+-- Logo na top bar
+local topLogo = Instance.new("ImageLabel")
+topLogo.Size = UDim2.new(0, 35, 0, 35)
+topLogo.Position = UDim2.new(0, 15, 0.5, -17)
+topLogo.BackgroundTransparency = 1
+topLogo.Image = "rbxassetid://4483345998"
+topLogo.ImageColor3 = Color3.fromRGB(60, 120, 255)
+topLogo.Parent = topBar
+
+local topTitle = Instance.new("TextLabel")
+topTitle.Size = UDim2.new(0, 200, 1, 0)
+topTitle.Position = UDim2.new(0, 55, 0, 0)
+topTitle.BackgroundTransparency = 1
+topTitle.Text = "REBELDE X DRYX"
+topTitle.Font = Enum.Font.GothamBold
+topTitle.TextSize = 18
+topTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+topTitle.TextXAlignment = Enum.TextXAlignment.Left
+topTitle.Parent = topBar
+
+local topVersion = Instance.new("TextLabel")
+topVersion.Size = UDim2.new(0, 100, 0, 16)
+topVersion.Position = UDim2.new(0, 55, 0, 35)
+topVersion.BackgroundTransparency = 1
+topVersion.Text = "v2.0 • OTIMIZADO"
+topVersion.Font = Enum.Font.Gotham
+topVersion.TextSize = 10
+topVersion.TextColor3 = Color3.fromRGB(60, 120, 255)
+topVersion.TextXAlignment = Enum.TextXAlignment.Left
+topVersion.Parent = topBar
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 35, 0, 35)
+closeBtn.Position = UDim2.new(1, -45, 0.5, -17)
+closeBtn.Text = "✕"
+closeBtn.TextSize = 18
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Parent = topBar
+style(closeBtn, 10)
+
+-- Minimize button
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 35, 0, 35)
+minimizeBtn.Position = UDim2.new(1, -85, 0.5, -17)
+minimizeBtn.Text = "−"
+minimizeBtn.TextSize = 24
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+minimizeBtn.Parent = topBar
+style(minimizeBtn, 10)
+
+-- ===== TAB MENU =====
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, 0, 0, 50)
+tabBar.Position = UDim2.new(0, 0, 0, 60)
+tabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+tabBar.Parent = hub
+
+local tabList = Instance.new("Frame")
+tabList.Size = UDim2.new(1, -40, 1, 0)
+tabList.Position = UDim2.new(0, 20, 0, 0)
+tabList.BackgroundTransparency = 1
+tabList.Parent = tabBar
+
+local tabs = {}
+local currentTab = "PRINCIPAL"
+
+-- Função para criar aba
+local function createTab(name, icon, position)
+	local tabBtn = Instance.new("TextButton")
+	tabBtn.Size = UDim2.new(0, 100, 0, 35)
+	tabBtn.Position = UDim2.new(0, position, 0, 7)
+	tabBtn.BackgroundTransparency = 1
+	tabBtn.Text = ""
+	tabBtn.Parent = tabList
+	
+	local tabIcon = Instance.new("ImageLabel")
+	tabIcon.Size = UDim2.new(0, 20, 0, 20)
+	tabIcon.Position = UDim2.new(0, 15, 0.5, -10)
+	tabIcon.BackgroundTransparency = 1
+	tabIcon.Image = icon
+	tabIcon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+	tabIcon.Parent = tabBtn
+	
+	local tabText = Instance.new("TextLabel")
+	tabText.Size = UDim2.new(1, -45, 1, 0)
+	tabText.Position = UDim2.new(0, 40, 0, 0)
+	tabText.BackgroundTransparency = 1
+	tabText.Text = name
+	tabText.Font = Enum.Font.Gotham
+	tabText.TextSize = 14
+	tabText.TextColor3 = Color3.fromRGB(150, 150, 150)
+	tabText.TextXAlignment = Enum.TextXAlignment.Left
+	tabText.Parent = tabBtn
+	
+	local indicator = Instance.new("Frame")
+	indicator.Size = UDim2.new(1, -20, 0, 2)
+	indicator.Position = UDim2.new(0, 10, 1, -5)
+	indicator.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+	indicator.Visible = false
+	style(indicator, 2)
+	indicator.Parent = tabBtn
+	
+	tabs[name] = {
+		button = tabBtn,
+		icon = tabIcon,
+		text = tabText,
+		indicator = indicator
+	}
+	
+	tabBtn.MouseButton1Click:Connect(function()
+		for _, tab in pairs(tabs) do
+			tab.icon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+			tab.text.TextColor3 = Color3.fromRGB(150, 150, 150)
+			tab.indicator.Visible = false
+		end
+		
+		tabIcon.ImageColor3 = Color3.fromRGB(60, 120, 255)
+		tabText.TextColor3 = Color3.fromRGB(255, 255, 255)
+		indicator.Visible = true
+		
+		currentTab = name
+		updateTabContent(name)
+	end)
+	
+	return #tabs
+end
+
+-- Área de conteúdo
+local contentArea = Instance.new("Frame")
+contentArea.Size = UDim2.new(1, -40, 1, -140)
+contentArea.Position = UDim2.new(0, 20, 0, 120)
+contentArea.BackgroundTransparency = 1
+contentArea.Parent = hub
+
+local contentPages = {}
+
+-- Função para criar página de conteúdo
+local function createPage(name)
+	local page = Instance.new("ScrollingFrame")
+	page.Size = UDim2.new(1, 0, 1, 0)
+	page.BackgroundTransparency = 1
+	page.ScrollBarThickness = 6
+	page.ScrollBarImageColor3 = Color3.fromRGB(60, 120, 255)
+	page.CanvasSize = UDim2.new(0, 0, 0, 0)
+	page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	page.Visible = false
+	page.Parent = contentArea
+	
+	contentPages[name] = page
+	return page
+end
+
+-- Função para atualizar aba visível
+local function updateTabContent(tabName)
+	for name, page in pairs(contentPages) do
+		page.Visible = (name == tabName)
+	end
+end
+
+-- ===== CRIAR ABAS =====
+createTab("PRINCIPAL", "rbxassetid://3926305904", 0)
+createTab("GRÁFICOS", "rbxassetid://3926307379", 110)
+createTab("MOVIMENTO", "rbxassetid://3926307971", 220)
+createTab("COMBATE", "rbxassetid://3926311195", 330)
+
+-- ===== CRIAR PÁGINAS =====
+local mainPage = createPage("PRINCIPAL")
+local graphicsPage = createPage("GRÁFICOS")
+local movePage = createPage("MOVIMENTO")
+local combatPage = createPage("COMBATE")
+
+-- ================= TELA DE LOGIN PROFISSIONAL =================
+local login = Instance.new("Frame")
+login.Size = UDim2.new(0, 450, 0, 300)
+login.Position = UDim2.new(0.5, -225, 0.5, -150)
+login.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+login.ClipsDescendants = true
+login.Parent = gui
+style(login, 20)
+addStroke(login, 2, Color3.fromRGB(60, 120, 255), 0.7)
+
+-- Background Gradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 10))
+})
+gradient.Rotation = 45
+gradient.Parent = login
+
+-- Logo Grande
+local logoBig = Instance.new("ImageLabel")
+logoBig.Size = UDim2.new(0, 80, 0, 80)
+logoBig.Position = UDim2.new(0.5, -40, 0, 25)
+logoBig.BackgroundTransparency = 1
+logoBig.Image = "rbxassetid://4483345998"
+logoBig.ImageColor3 = Color3.fromRGB(60, 120, 255)
+logoBig.Parent = login
+
+-- Título
+local loginTitle = Instance.new("TextLabel")
+loginTitle.Size = UDim2.new(1, 0, 0, 30)
+loginTitle.Position = UDim2.new(0, 0, 0, 110)
+loginTitle.BackgroundTransparency = 1
+loginTitle.Text = "BEM-VINDO DE VOLTA"
+loginTitle.Font = Enum.Font.GothamBold
+loginTitle.TextSize = 18
+loginTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+loginTitle.Parent = login
+
+local loginSub = Instance.new("TextLabel")
+loginSub.Size = UDim2.new(1, 0, 0, 20)
+loginSub.Position = UDim2.new(0, 0, 0, 140)
+loginSub.BackgroundTransparency = 1
+loginSub.Text = "Digite a senha para continuar"
+loginSub.Font = Enum.Font.Gotham
+loginSub.TextSize = 12
+loginSub.TextColor3 = Color3.fromRGB(150, 150, 150)
+loginSub.Parent = login
+
+-- Campo de senha
+local boxContainer = Instance.new("Frame")
+boxContainer.Size = UDim2.new(0.8, 0, 0, 50)
+boxContainer.Position = UDim2.new(0.1, 0, 0, 180)
+boxContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+boxContainer.Parent = login
+style(boxContainer, 10)
+addStroke(boxContainer, 1, Color3.fromRGB(60, 120, 255), 0.8)
+
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(1, -20, 1, 0)
+box.Position = UDim2.new(0, 10, 0, 0)
+box.BackgroundTransparency = 1
+box.PlaceholderText = "••••••••"
+box.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+box.Text = ""
+box.TextColor3 = Color3.new(1, 1, 1)
+box.Font = Enum.Font.Gotham
+box.TextSize = 16
+box.ClearTextOnFocus = false
+box.Parent = boxContainer
+
+-- Botão verificar
+local verify = Instance.new("TextButton")
+verify.Size = UDim2.new(0.6, 0, 0, 45)
+verify.Position = UDim2.new(0.2, 0, 0, 240)
+verify.Text = "ENTRAR"
+verify.Font = Enum.Font.GothamBold
+verify.TextSize = 16
+verify.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+verify.TextColor3 = Color3.new(1, 1, 1)
+verify.Parent = login
+style(verify, 10)
+
+verify.MouseEnter:Connect(function()
+	createTween(verify, {BackgroundColor3 = Color3.fromRGB(80, 140, 255)}, 0.2):Play()
+end)
+verify.MouseLeave:Connect(function()
+	createTween(verify, {BackgroundColor3 = Color3.fromRGB(60, 120, 255)}, 0.2):Play()
+end)
+
+-- ===== SISTEMA CF SPEED =====
+local function createSpeedIndicator()
+	if speedIndicator then speedIndicator:Destroy() end
+	
+	speedIndicator = Instance.new("Frame")
+	speedIndicator.Size = UDim2.new(0, 140, 0, 40)
+	speedIndicator.Position = UDim2.new(0.5, -70, 0.9, 0)
+	speedIndicator.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	speedIndicator.BackgroundTransparency = 0.3
+	speedIndicator.BorderSizePixel = 0
+	speedIndicator.Parent = player:WaitForChild("PlayerGui")
+	style(speedIndicator, 8)
+	addStroke(speedIndicator, 1, Color3.fromRGB(0, 255, 100), 0.5)
+	
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Text = "⚡ " .. cfSpeedValue .. "x SPEED"
+	text.Font = Enum.Font.GothamBold
+	text.TextSize = 16
+	text.TextColor3 = Color3.fromRGB(0, 255, 100)
+	text.TextStrokeTransparency = 0.5
+	text.Parent = speedIndicator
+	
+	createTween(speedIndicator, {Position = UDim2.new(0.5, -70, 0.85, 0)}, 0.5):Play()
+end
+
+local function updateSpeedIndicator()
+	if speedIndicator then
+		local text = speedIndicator:FindFirstChildOfClass("TextLabel")
+		if text then
+			text.Text = "⚡ " .. cfSpeedValue .. "x SPEED"
+		end
+	end
+end
+
+local function startCFSpeed()
+	if cfConnection then cfConnection:Disconnect() end
+	
+	cfConnection = RunService.Heartbeat:Connect(function()
+		if not cfSpeedActive then return end
+		
+		local character = player.Character
+		if not character then
+			character = player.CharacterAdded:Wait()
+		end
+		
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+		
+		if not humanoid or not rootPart or humanoid.Health <= 0 then return end
+		
+		local camera = Workspace.CurrentCamera
+		local moveDirection = Vector3.new()
+		
+		if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+			moveDirection = moveDirection + camera.CFrame.LookVector * Vector3.new(1, 0, 1)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+			moveDirection = moveDirection - camera.CFrame.LookVector * Vector3.new(1, 0, 1)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+			moveDirection = moveDirection - camera.CFrame.RightVector * Vector3.new(1, 0, 1)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+			moveDirection = moveDirection + camera.CFrame.RightVector * Vector3.new(1, 0, 1)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+			moveDirection = moveDirection + Vector3.new(0, 1, 0)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+			moveDirection = moveDirection - Vector3.new(0, 1, 0)
+		end
+		
+		if moveDirection.Magnitude > 0 then
+			moveDirection = moveDirection.Unit
+			rootPart.CFrame = rootPart.CFrame + (moveDirection * cfSpeedValue * 0.5)
+		end
+	end)
+end
+
+-- ===== SISTEMA AIMBOT E ESP =====
+local function createFOVCircle()
+	if fovCircle then fovCircle:Destroy() end
+	
+	fovCircle = Instance.new("Frame")
+	fovCircle.Name = "FOVCircle"
+	fovCircle.Size = UDim2.new(0, fovSize * 2, 0, fovSize * 2)
+	fovCircle.Position = UDim2.new(0.5, -fovSize, 0.5, -fovSize)
+	fovCircle.BackgroundTransparency = 1
+	fovCircle.BorderSizePixel = 0
+	fovCircle.Parent = gui
+	fovCircle.Visible = false
+	
+	local circle = Instance.new("ImageLabel")
+	circle.Size = UDim2.new(1, 0, 1, 0)
+	circle.BackgroundTransparency = 1
+	circle.Image = "rbxassetid://4587018687"
+	circle.ImageColor3 = Color3.fromRGB(60, 120, 255)
+	circle.ImageTransparency = 0.6
+	circle.Parent = fovCircle
+end
+
+local function getClosestTarget()
+	local character = player.Character
+	if not character then return nil end
+	
+	local rootPart = character:FindFirstChild("HumanoidRootPart")
+	if not rootPart then return nil end
+	
+	local closestTarget = nil
+	local closestDistance = fovSize
+	
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= player then
+			local otherChar = otherPlayer.Character
+			if otherChar then
+				local otherRoot = otherChar:FindFirstChild("HumanoidRootPart")
+				local otherHumanoid = otherChar:FindFirstChildOfClass("Humanoid")
+				
+				if otherRoot and otherHumanoid and otherHumanoid.Health > 0 then
+					local screenPoint, onScreen = camera:WorldToViewportPoint(otherRoot.Position)
+					
+					if onScreen then
+						local center = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+						local targetPos = Vector2.new(screenPoint.X, screenPoint.Y)
+						local distance = (targetPos - center).Magnitude
+						
+						if distance < closestDistance then
+							closestDistance = distance
+							closestTarget = otherRoot
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	return closestTarget
+end
+
+local function startAimbot()
+	if aimbotConnection then aimbotConnection:Disconnect() end
+	createFOVCircle()
+	
+	aimbotConnection = RunService.RenderStepped:Connect(function()
+		if not aimbotActive then
+			if fovCircle then fovCircle.Visible = false end
+			return
+		end
+		
+		if fovCircle then
+			fovCircle.Visible = true
+			fovCircle.Size = UDim2.new(0, fovSize * 2, 0, fovSize * 2)
+			fovCircle.Position = UDim2.new(0.5, -fovSize, 0.5, -fovSize)
+		end
+		
+		local target = getClosestTarget()
+		if target then
+			local targetPosition = target.Position + Vector3.new(0, 2, 0)
+			camera.CFrame = CFrame.lookAt(camera.CFrame.Position, targetPosition)
+		end
+	end)
+end
+
+local function createESPLine(targetPlayer)
+	if espObjects[targetPlayer] then return end
+	
+	local espData = {
+		line = Instance.new("Frame"),
+		text = Instance.new("TextLabel")
+	}
+	
+	espData.line.Name = "ESPLine"
+	espData.line.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+	espData.line.BorderSizePixel = 0
+	espData.line.Visible = false
+	espData.line.Parent = gui
+	
+	espData.text.Name = "ESPText"
+	espData.text.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	espData.text.BackgroundTransparency = 0.3
+	espData.text.Text = targetPlayer.Name
+	espData.text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	espData.text.Font = Enum.Font.GothamBold
+	espData.text.TextSize = 14
+	espData.text.Size = UDim2.new(0, 100, 0, 20)
+	espData.text.Visible = false
+	style(espData.text, 4)
+	espData.text.Parent = gui
+	
+	espObjects[targetPlayer] = espData
+end
+
+local function updateESP()
+	if not espActive then
+		for _, data in pairs(espObjects) do
+			if data.line then data.line:Destroy() end
+			if data.text then data.text:Destroy() end
+		end
+		espObjects = {}
+		return
+	end
+	
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= player and not espObjects[otherPlayer] then
+			createESPLine(otherPlayer)
+		end
+	end
+	
+	for otherPlayer, data in pairs(espObjects) do
+		local otherChar = otherPlayer.Character
+		if otherChar then
+			local otherRoot = otherChar:FindFirstChild("HumanoidRootPart")
+			local otherHumanoid = otherChar:FindFirstChildOfClass("Humanoid")
+			
+			if otherRoot and otherHumanoid and otherHumanoid.Health > 0 then
+				local character = player.Character
+				if character then
+					local rootPart = character:FindFirstChild("HumanoidRootPart")
+					if rootPart then
+						local screenPos, onScreen = camera:WorldToViewportPoint(otherRoot.Position)
+						
+						if onScreen then
+							local center = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+							local targetPos = Vector2.new(screenPos.X, screenPos.Y)
+							
+							data.line.Visible = true
+							data.line.Size = UDim2.new(0, (targetPos - center).Magnitude, 0, 2)
+							data.line.Position = UDim2.new(0, center.X, 0, center.Y)
+							data.line.Rotation = math.deg(math.atan2(targetPos.Y - center.Y, targetPos.X - center.X))
+						end
+					end
+				end
+			end
+		end
+	end
+end
