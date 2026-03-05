@@ -1,0 +1,229 @@
+-- 🌌 REBELDE X DRYX HUB - V3.1 PREMIUM (COM PERFIL E SKY FUNCIONAL)
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"
+
+-- ===== TEMA E CONFIGURAÇÃO =====
+local Theme = {
+	Background = Color3.fromRGB(11, 11, 14),
+	Sidebar = Color3.fromRGB(15, 15, 20),
+	Accent = Color3.fromRGB(0, 162, 255),
+	Text = Color3.fromRGB(255, 255, 255),
+	SecondaryText = Color3.fromRGB(180, 180, 180),
+	Button = Color3.fromRGB(25, 25, 35)
+}
+
+if player.PlayerGui:FindFirstChild("RebeldeHubPremium") then
+	player.PlayerGui.RebeldeHubPremium:Destroy()
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "RebeldeHubPremium"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function applyDesign(obj, radius, strokeColor)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 6)
+	corner.Parent = obj
+	if strokeColor then
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = strokeColor
+		stroke.Thickness = 1.2
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		stroke.Transparency = 0.6
+		stroke.Parent = obj
+	end
+end
+
+-- ================= LOGIN =================
+local loginFrame = Instance.new("Frame")
+loginFrame.Size = UDim2.new(0, 320, 0, 380)
+loginFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+loginFrame.BackgroundColor3 = Theme.Background
+loginFrame.Parent = gui
+applyDesign(loginFrame, 15, Theme.Accent)
+
+local logo = Instance.new("TextLabel")
+logo.Size = UDim2.new(1, 0, 0, 100)
+logo.Text = "RXD"
+logo.Font = Enum.Font.GothamBold
+logo.TextSize = 50
+logo.TextColor3 = Theme.Accent
+logo.BackgroundTransparency = 1
+logo.Parent = loginFrame
+
+local passBox = Instance.new("TextBox")
+passBox.Size = UDim2.new(0.85, 0, 0, 45)
+passBox.Position = UDim2.new(0.075, 0, 0.45, 0)
+passBox.PlaceholderText = "SENHA"
+passBox.Text = ""
+passBox.BackgroundColor3 = Theme.Button
+passBox.TextColor3 = Color3.new(1,1,1)
+passBox.Parent = loginFrame
+applyDesign(passBox, 8)
+
+local enterBtn = Instance.new("TextButton")
+enterBtn.Size = UDim2.new(0.85, 0, 0, 45)
+enterBtn.Position = UDim2.new(0.075, 0, 0.6, 0)
+enterBtn.Text = "LOGAR"
+enterBtn.BackgroundColor3 = Theme.Accent
+enterBtn.TextColor3 = Color3.new(1,1,1)
+enterBtn.Font = Enum.Font.GothamBold
+enterBtn.Parent = loginFrame
+applyDesign(enterBtn, 8)
+
+-- ================= MAIN HUB =================
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 580, 0, 360)
+main.Position = UDim2.new(0.5, -290, 0.5, -180)
+main.BackgroundColor3 = Theme.Background
+main.Visible = false
+main.Parent = gui
+applyDesign(main, 10, Color3.fromRGB(45, 45, 50))
+
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 160, 1, 0)
+sidebar.BackgroundColor3 = Theme.Sidebar
+sidebar.Parent = main
+applyDesign(sidebar, 10)
+
+-- ===== PERFIL DO PLAYER NA SIDEBAR =====
+local profileFrame = Instance.new("Frame")
+profileFrame.Size = UDim2.new(1, -20, 0, 50)
+profileFrame.Position = UDim2.new(0, 10, 1, -60)
+profileFrame.BackgroundTransparency = 1
+profileFrame.Parent = sidebar
+
+local playerImg = Instance.new("ImageLabel")
+playerImg.Size = UDim2.new(0, 40, 0, 40)
+playerImg.Position = UDim2.new(0, 0, 0.5, -20)
+playerImg.BackgroundColor3 = Theme.Button
+-- Puxa a foto do avatar do player logado
+playerImg.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+playerImg.Parent = profileFrame
+applyDesign(playerImg, 100, Theme.Accent) -- Foto redonda
+
+local playerName = Instance.new("TextLabel")
+playerName.Size = UDim2.new(1, -50, 0, 20)
+playerName.Position = UDim2.new(0, 45, 0.2, 0)
+playerName.Text = player.DisplayName
+playerName.Font = Enum.Font.GothamBold
+playerName.TextSize = 12
+playerName.TextColor3 = Theme.Text
+playerName.TextXAlignment = Enum.TextXAlignment.Left
+playerName.BackgroundTransparency = 1
+playerName.Parent = profileFrame
+
+local playerStatus = Instance.new("TextLabel")
+playerStatus.Size = UDim2.new(1, -50, 0, 20)
+playerStatus.Position = UDim2.new(0, 45, 0.5, 0)
+playerStatus.Text = "Premium User"
+playerStatus.Font = Enum.Font.Gotham
+playerStatus.TextSize = 10
+playerStatus.TextColor3 = Theme.Accent
+playerStatus.TextXAlignment = Enum.TextXAlignment.Left
+playerStatus.BackgroundTransparency = 1
+playerStatus.Parent = profileFrame
+
+-- ================= LÓGICA DE ABAS E CONTEÚDO =================
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -180, 1, -20)
+container.Position = UDim2.new(0, 170, 0, 10)
+container.BackgroundTransparency = 1
+container.Parent = main
+
+local tabs = {}
+local currentTab = nil
+
+local function createTab(name)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.9, 0, 0, 35)
+	btn.Position = UDim2.new(0.05, 0, 0, 20 + (#sidebar:GetChildren()-2) * 40)
+	btn.BackgroundTransparency = 1
+	btn.Text = "  " .. name
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 13
+	btn.TextColor3 = Theme.SecondaryText
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	btn.Parent = sidebar
+	applyDesign(btn, 6)
+	
+	local page = Instance.new("ScrollingFrame")
+	page.Size = UDim2.new(1, 0, 1, 0)
+	page.BackgroundTransparency = 1
+	page.Visible = false
+	page.ScrollBarThickness = 0
+	page.Parent = container
+	
+	local list = Instance.new("UIListLayout")
+	list.Padding = UDim.new(0, 8)
+	list.Parent = page
+
+	btn.MouseButton1Click:Connect(function()
+		if currentTab then currentTab.Visible = false end
+		page.Visible = true
+		currentTab = page
+		for _, v in pairs(sidebar:GetChildren()) do
+			if v:IsA("TextButton") then v.TextColor3 = Theme.SecondaryText end
+		end
+		btn.TextColor3 = Theme.Accent
+	end)
+	return page
+end
+
+local tabPerf = createTab("Performance")
+local tabSky = createTab("Sky Visual")
+
+-- ================= FUNÇÕES SKY (FUNCIONAL) =================
+local function applySky(id)
+	for _, old in pairs(Lighting:GetChildren()) do
+		if old:IsA("Sky") then old:Destroy() end
+	end
+	local s = Instance.new("Sky")
+	s.SkyboxBk = id s.SkyboxDn = id s.SkyboxFt = id
+	s.SkyboxLf = id s.SkyboxRt = id s.SkyboxUp = id
+	s.Parent = Lighting
+end
+
+local skies = {
+	{Name = "Ensolarado", ID = "rbxassetid://140664609"},
+	{Name = "Noturno Dark", ID = "rbxassetid://395375914"},
+	{Name = "Roxo Galáxia", ID = "rbxassetid://455537903"},
+	{Name = "Vape Blue", ID = "rbxassetid://159454299"}
+}
+
+for _, sky in pairs(skies) do
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, -10, 0, 40)
+	b.BackgroundColor3 = Theme.Button
+	b.Text = "Aplicar " .. sky.Name
+	b.Font = Enum.Font.GothamSemibold
+	b.TextColor3 = Theme.Text
+	b.Parent = tabSky
+	applyDesign(b, 8)
+	
+	b.MouseButton1Click:Connect(function()
+		applySky(sky.ID)
+		b.Text = sky.Name .. " Aplicado!"
+		task.wait(1)
+		b.Text = "Aplicar " .. sky.Name
+	end)
+end
+
+-- ================= LOGIN E ANIMAÇÃO =================
+enterBtn.MouseButton1Click:Connect(function()
+	if passBox.Text == SENHA_CORRETA then
+		loginFrame:TweenPosition(UDim2.new(0.5, -160, 1, 50), "In", "Quart", 0.5)
+		task.wait(0.5)
+		loginFrame.Visible = false
+		main.Visible = true
+		main.Size = UDim2.new(0,0,0,0)
+		main:TweenSize(UDim2.new(0, 580, 0, 360), "Out", "Back", 0.5)
+	end
+end)
