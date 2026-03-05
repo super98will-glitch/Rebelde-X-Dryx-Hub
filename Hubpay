@@ -1,0 +1,728 @@
+-- 🌌 REBELDE X DRYX HUB - PROFESSIONAL EDITION
+-- Design Moderno com Abas, Animações Suaves e Efeitos Glassmorphism
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"
+local camera = Workspace.CurrentCamera
+
+-- ===== UTILITÁRIOS =====
+local function createTween(obj, props, time, style)
+	local tweenInfo = TweenInfo.new(
+		time or 0.3,
+		Enum.EasingStyle[style or "Quad"],
+		Enum.EasingDirection.Out
+	)
+	return TweenService:Create(obj, tweenInfo, props)
+end
+
+local function style(obj, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 12)
+	corner.Parent = obj
+end
+
+local function addStroke(obj, thickness, color, transparency)
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = thickness or 1
+	stroke.Color = color or Color3.fromRGB(255,255,255)
+	stroke.Transparency = transparency or 0.8
+	stroke.Parent = obj
+end
+
+local function addShadow(obj, transparency, size)
+	local shadow = Instance.new("UIGradient")
+	shadow.Rotation = 90
+	shadow.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, transparency or 0.7),
+		NumberSequenceKeypoint.new(1, 1)
+	})
+	shadow.Parent = obj
+end
+
+-- ===== WATERMARK PROFISSIONAL =====
+local infoGui = Instance.new("ScreenGui")
+infoGui.Name = "RebeldeXDryx_Info"
+infoGui.IgnoreGuiInset = true
+infoGui.ResetOnSpawn = false
+infoGui.Parent = player:WaitForChild("PlayerGui")
+
+local watermark = Instance.new("Frame")
+watermark.Size = UDim2.new(0, 220, 0, 50)
+watermark.Position = UDim2.new(1, -240, 0, 20)
+watermark.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+watermark.BackgroundTransparency = 0.2
+watermark.Parent = infoGui
+style(watermark, 10)
+addStroke(watermark, 1, Color3.fromRGB(60, 120, 255), 0.5)
+
+local logo = Instance.new("ImageLabel")
+logo.Size = UDim2.new(0, 30, 0, 30)
+logo.Position = UDim2.new(0, 10, 0.5, -15)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://4483345998"
+logo.ImageColor3 = Color3.fromRGB(60, 120, 255)
+logo.Parent = watermark
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -50, 0, 20)
+title.Position = UDim2.new(0, 45, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "REBELDE X DRYX"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = watermark
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(1, -50, 0, 16)
+fpsLabel.Position = UDim2.new(0, 45, 0, 26)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.Text = "FPS: 0 | Ping: 0ms"
+fpsLabel.Font = Enum.Font.Gotham
+fpsLabel.TextSize = 12
+fpsLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+fpsLabel.Parent = watermark
+
+-- Atualizar FPS e Ping
+RunService.RenderStepped:Connect(function(dt)
+	local fps = math.floor(1 / dt)
+	local ping = math.floor(player:GetNetworkPing() * 1000)
+	fpsLabel.Text = "FPS: " .. fps .. " | Ping: " .. ping .. "ms"
+	
+	local pulse = (math.sin(tick() * 3) + 1) / 2
+	logo.ImageColor3 = Color3.fromRGB(60 + (pulse * 40), 120 + (pulse * 40), 255)
+end)
+
+-- ===== BLUR EFFECT =====
+for _, v in pairs(Lighting:GetChildren()) do
+	if v:IsA("BlurEffect") then v:Destroy() end
+end
+
+local blur = Instance.new("BlurEffect")
+blur.Size = 15
+blur.Enabled = false
+blur.Parent = Lighting
+
+-- ===== GUI PRINCIPAL =====
+local gui = Instance.new("ScreenGui")
+gui.Name = "RebeldeXDryx_Hub"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- ================= LOGIN SCREEN PROFISSIONAL =================
+local login = Instance.new("Frame")
+login.Size = UDim2.new(0, 450, 0, 300)
+login.Position = UDim2.new(0.5, -225, 0.5, -150)
+login.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+login.ClipsDescendants = true
+login.Parent = gui
+style(login, 20)
+addStroke(login, 2, Color3.fromRGB(60, 120, 255), 0.7)
+
+-- Background Gradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 10))
+})
+gradient.Rotation = 45
+gradient.Parent = login
+
+-- Logo Grande
+local logoBig = Instance.new("ImageLabel")
+logoBig.Size = UDim2.new(0, 80, 0, 80)
+logoBig.Position = UDim2.new(0.5, -40, 0, 25)
+logoBig.BackgroundTransparency = 1
+logoBig.Image = "rbxassetid://4483345998"
+logoBig.ImageColor3 = Color3.fromRGB(60, 120, 255)
+logoBig.Parent = login
+
+-- Título
+local loginTitle = Instance.new("TextLabel")
+loginTitle.Size = UDim2.new(1, 0, 0, 30)
+loginTitle.Position = UDim2.new(0, 0, 0, 110)
+loginTitle.BackgroundTransparency = 1
+loginTitle.Text = "BEM-VINDO DE VOLTA"
+loginTitle.Font = Enum.Font.GothamBold
+loginTitle.TextSize = 18
+loginTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+loginTitle.Parent = login
+
+local loginSub = Instance.new("TextLabel")
+loginSub.Size = UDim2.new(1, 0, 0, 20)
+loginSub.Position = UDim2.new(0, 0, 0, 140)
+loginSub.BackgroundTransparency = 1
+loginSub.Text = "Digite a senha para continuar"
+loginSub.Font = Enum.Font.Gotham
+loginSub.TextSize = 12
+loginSub.TextColor3 = Color3.fromRGB(150, 150, 150)
+loginSub.Parent = login
+
+-- Campo de senha
+local boxContainer = Instance.new("Frame")
+boxContainer.Size = UDim2.new(0.8, 0, 0, 50)
+boxContainer.Position = UDim2.new(0.1, 0, 0, 180)
+boxContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+boxContainer.Parent = login
+style(boxContainer, 10)
+addStroke(boxContainer, 1, Color3.fromRGB(60, 120, 255), 0.8)
+
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(1, -20, 1, 0)
+box.Position = UDim2.new(0, 10, 0, 0)
+box.BackgroundTransparency = 1
+box.PlaceholderText = "••••••••"
+box.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+box.Text = ""
+box.TextColor3 = Color3.new(1, 1, 1)
+box.Font = Enum.Font.Gotham
+box.TextSize = 16
+box.ClearTextOnFocus = false
+box.Parent = boxContainer
+
+-- Botão verificar
+local verify = Instance.new("TextButton")
+verify.Size = UDim2.new(0.6, 0, 0, 45)
+verify.Position = UDim2.new(0.2, 0, 0, 240)
+verify.Text = "ENTRAR"
+verify.Font = Enum.Font.GothamBold
+verify.TextSize = 16
+verify.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+verify.TextColor3 = Color3.new(1, 1, 1)
+verify.Parent = login
+style(verify, 10)
+
+-- Efeito hover no botão
+verify.MouseEnter:Connect(function()
+	createTween(verify, {BackgroundColor3 = Color3.fromRGB(80, 140, 255)}, 0.2):Play()
+end)
+verify.MouseLeave:Connect(function()
+	createTween(verify, {BackgroundColor3 = Color3.fromRGB(60, 120, 255)}, 0.2):Play()
+end)
+
+-- ================= HUB PRINCIPAL =================
+local hub = Instance.new("Frame")
+hub.Size = UDim2.new(0, 0, 0, 0)
+hub.Position = UDim2.new(0.5, -400, 0.5, -300)
+hub.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+hub.ClipsDescendants = true
+hub.Visible = false
+hub.Parent = gui
+style(hub, 20)
+addStroke(hub, 2, Color3.fromRGB(60, 120, 255), 0.7)
+
+-- Gradient do hub
+local hubGradient = Instance.new("UIGradient")
+hubGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 28)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 8, 14))
+})
+hubGradient.Rotation = 45
+hubGradient.Parent = hub
+
+-- ===== TOP BAR =====
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 60)
+topBar.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+topBar.Parent = hub
+style(topBar, 20)
+
+-- Só as bordas superiores arredondadas
+local topBarCorner = Instance.new("UICorner")
+topBarCorner.CornerRadius = UDim.new(0, 20)
+topBarCorner.Parent = topBar
+
+-- Logo na top bar
+local topLogo = Instance.new("ImageLabel")
+topLogo.Size = UDim2.new(0, 35, 0, 35)
+topLogo.Position = UDim2.new(0, 15, 0.5, -17)
+topLogo.BackgroundTransparency = 1
+topLogo.Image = "rbxassetid://4483345998"
+topLogo.ImageColor3 = Color3.fromRGB(60, 120, 255)
+topLogo.Parent = topBar
+
+local topTitle = Instance.new("TextLabel")
+topTitle.Size = UDim2.new(0, 200, 1, 0)
+topTitle.Position = UDim2.new(0, 55, 0, 0)
+topTitle.BackgroundTransparency = 1
+topTitle.Text = "REBELDE X DRYX"
+topTitle.Font = Enum.Font.GothamBold
+topTitle.TextSize = 18
+topTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+topTitle.TextXAlignment = Enum.TextXAlignment.Left
+topTitle.Parent = topBar
+
+local topVersion = Instance.new("TextLabel")
+topVersion.Size = UDim2.new(0, 100, 0, 16)
+topVersion.Position = UDim2.new(0, 55, 0, 35)
+topVersion.BackgroundTransparency = 1
+topVersion.Text = "v2.0 • PROFESSIONAL"
+topVersion.Font = Enum.Font.Gotham
+topVersion.TextSize = 10
+topVersion.TextColor3 = Color3.fromRGB(60, 120, 255)
+topVersion.TextXAlignment = Enum.TextXAlignment.Left
+topVersion.Parent = topBar
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 35, 0, 35)
+closeBtn.Position = UDim2.new(1, -45, 0.5, -17)
+closeBtn.Text = "✕"
+closeBtn.TextSize = 18
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Parent = topBar
+style(closeBtn, 10)
+
+closeBtn.MouseEnter:Connect(function()
+	createTween(closeBtn, {BackgroundColor3 = Color3.fromRGB(255, 100, 100)}, 0.2):Play()
+end)
+closeBtn.MouseLeave:Connect(function()
+	createTween(closeBtn, {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}, 0.2):Play()
+end)
+
+-- Minimize button
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 35, 0, 35)
+minimizeBtn.Position = UDim2.new(1, -85, 0.5, -17)
+minimizeBtn.Text = "−"
+minimizeBtn.TextSize = 24
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+minimizeBtn.Parent = topBar
+style(minimizeBtn, 10)
+
+-- ===== TAB MENU =====
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, 0, 0, 50)
+tabBar.Position = UDim2.new(0, 0, 0, 60)
+tabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+tabBar.Parent = hub
+
+local tabList = Instance.new("Frame")
+tabList.Size = UDim2.new(1, -40, 1, 0)
+tabList.Position = UDim2.new(0, 20, 0, 0)
+tabList.BackgroundTransparency = 1
+tabList.Parent = tabBar
+
+local tabs = {}
+local currentTab = "main"
+
+-- Função para criar aba
+local function createTab(name, icon, position)
+	local tabBtn = Instance.new("TextButton")
+	tabBtn.Size = UDim2.new(0, 100, 0, 35)
+	tabBtn.Position = UDim2.new(0, position, 0, 7)
+	tabBtn.BackgroundTransparency = 1
+	tabBtn.Text = ""
+	tabBtn.Parent = tabList
+	
+	local tabIcon = Instance.new("ImageLabel")
+	tabIcon.Size = UDim2.new(0, 20, 0, 20)
+	tabIcon.Position = UDim2.new(0, 15, 0.5, -10)
+	tabIcon.BackgroundTransparency = 1
+	tabIcon.Image = icon
+	tabIcon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+	tabIcon.Parent = tabBtn
+	
+	local tabText = Instance.new("TextLabel")
+	tabText.Size = UDim2.new(1, -45, 1, 0)
+	tabText.Position = UDim2.new(0, 40, 0, 0)
+	tabText.BackgroundTransparency = 1
+	tabText.Text = name
+	tabText.Font = Enum.Font.Gotham
+	tabText.TextSize = 14
+	tabText.TextColor3 = Color3.fromRGB(150, 150, 150)
+	tabText.TextXAlignment = Enum.TextXAlignment.Left
+	tabText.Parent = tabBtn
+	
+	local indicator = Instance.new("Frame")
+	indicator.Size = UDim2.new(1, -20, 0, 2)
+	indicator.Position = UDim2.new(0, 10, 1, -5)
+	indicator.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+	indicator.Visible = false
+	style(indicator, 2)
+	indicator.Parent = tabBtn
+	
+	tabs[name] = {
+		button = tabBtn,
+		icon = tabIcon,
+		text = tabText,
+		indicator = indicator
+	}
+	
+	tabBtn.MouseButton1Click:Connect(function()
+		for _, tab in pairs(tabs) do
+			tab.icon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+			tab.text.TextColor3 = Color3.fromRGB(150, 150, 150)
+			tab.indicator.Visible = false
+		end
+		
+		tabIcon.ImageColor3 = Color3.fromRGB(60, 120, 255)
+		tabText.TextColor3 = Color3.fromRGB(255, 255, 255)
+		indicator.Visible = true
+		
+		currentTab = name
+		updateTabContent(name)
+	end)
+	
+	return #tabs
+end
+
+-- Área de conteúdo
+local contentArea = Instance.new("Frame")
+contentArea.Size = UDim2.new(1, -40, 1, -140)
+contentArea.Position = UDim2.new(0, 20, 0, 120)
+contentArea.BackgroundTransparency = 1
+contentArea.Parent = hub
+
+local contentPages = {}
+
+-- Função para criar página de conteúdo
+local function createPage(name)
+	local page = Instance.new("ScrollingFrame")
+	page.Size = UDim2.new(1, 0, 1, 0)
+	page.BackgroundTransparency = 1
+	page.ScrollBarThickness = 6
+	page.ScrollBarImageColor3 = Color3.fromRGB(60, 120, 255)
+	page.CanvasSize = UDim2.new(0, 0, 0, 0)
+	page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	page.Visible = false
+	page.Parent = contentArea
+	
+	contentPages[name] = page
+	return page
+end
+
+-- Função para atualizar aba visível
+local function updateTabContent(tabName)
+	for name, page in pairs(contentPages) do
+		page.Visible = (name == tabName)
+	end
+end
+
+-- ===== CRIAR ABAS =====
+createTab("PRINCIPAL", "rbxassetid://3926305904", 0) -- Ícone de casa
+createTab("MOVIMENTO", "rbxassetid://3926307971", 110) -- Ícone de foguete
+createTab("COMBATE", "rbxassetid://3926311195", 220) -- Ícone de mira
+createTab("GRÁFICOS", "rbxassetid://3926307379", 330) -- Ícone de gráfico
+
+-- ===== CRIAR PÁGINAS =====
+local mainPage = createPage("PRINCIPAL")
+local movePage = createPage("MOVIMENTO")
+local combatPage = createPage("COMBATE")
+local graphicsPage = createPage("GRÁFICOS")
+
+-- Variáveis globais
+local activated = false
+local rtxActive = false
+local rtxEffects = {}
+local cfSpeedActive = false
+local cfSpeedValue = 1
+local cfConnection = nil
+local speedIndicator = nil
+local aimbotActive = false
+local espActive = false
+local fovSize = 150
+local aimbotConnection = nil
+local espConnection = nil
+local fovCircle = nil
+local espObjects = {}
+
+-- ===== FUNÇÕES BASE (mantidas iguais) =====
+-- [Cole aqui todas as funções que você já tinha: isCharacter, optimizeUltraLowPoly, toggleRTX, etc.]
+
+-- Função para criar cards modernos
+local function createCard(parent, title, icon, yPos)
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(0.9, 0, 0, 80)
+	card.Position = UDim2.new(0.05, 0, 0, yPos)
+	card.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+	card.Parent = parent
+	style(card, 12)
+	addStroke(card, 1, Color3.fromRGB(60, 120, 255), 0.9)
+	
+	local cardIcon = Instance.new("ImageLabel")
+	cardIcon.Size = UDim2.new(0, 35, 0, 35)
+	cardIcon.Position = UDim2.new(0, 15, 0.5, -17)
+	cardIcon.BackgroundTransparency = 1
+	cardIcon.Image = icon
+	cardIcon.ImageColor3 = Color3.fromRGB(60, 120, 255)
+	cardIcon.Parent = card
+	
+	local cardTitle = Instance.new("TextLabel")
+	cardTitle.Size = UDim2.new(0.5, -50, 0, 20)
+	cardTitle.Position = UDim2.new(0, 60, 0, 15)
+	cardTitle.BackgroundTransparency = 1
+	cardTitle.Text = title
+	cardTitle.Font = Enum.Font.GothamBold
+	cardTitle.TextSize = 16
+	cardTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	cardTitle.TextXAlignment = Enum.TextXAlignment.Left
+	cardTitle.Parent = card
+	
+	return card, cardTitle
+end
+
+-- Função para criar toggle moderno
+local function createToggle(parent, text, yOffset, defaultState, callback)
+	local toggleFrame = Instance.new("Frame")
+	toggleFrame.Size = UDim2.new(1, -70, 0, 30)
+	toggleFrame.Position = UDim2.new(0, 60, 0, yOffset)
+	toggleFrame.BackgroundTransparency = 1
+	toggleFrame.Parent = parent
+	
+	local toggleText = Instance.new("TextLabel")
+	toggleText.Size = UDim2.new(1, 0, 1, 0)
+	toggleText.BackgroundTransparency = 1
+	toggleText.Text = text
+	toggleText.Font = Enum.Font.Gotham
+	toggleText.TextSize = 14
+	toggleText.TextColor3 = Color3.fromRGB(200, 200, 200)
+	toggleText.TextXAlignment = Enum.TextXAlignment.Left
+	toggleText.Parent = toggleFrame
+	
+	local toggleBtn = Instance.new("TextButton")
+	toggleBtn.Size = UDim2.new(0, 50, 0, 24)
+	toggleBtn.Position = UDim2.new(1, -50, 0, 3)
+	toggleBtn.BackgroundColor3 = defaultState and Color3.fromRGB(60, 120, 255) or Color3.fromRGB(50, 50, 60)
+	toggleBtn.Text = ""
+	toggleBtn.Parent = toggleFrame
+	style(toggleBtn, 12)
+	
+	local toggleCircle = Instance.new("Frame")
+	toggleCircle.Size = UDim2.new(0, 18, 0, 18)
+	toggleCircle.Position = UDim2.new(defaultState and 0.6 or 0.1, 0, 0.5, -9)
+	toggleCircle.BackgroundColor3 = Color3.new(1, 1, 1)
+	toggleCircle.Parent = toggleBtn
+	style(toggleCircle, 9)
+	
+	local active = defaultState
+	
+	toggleBtn.MouseButton1Click:Connect(function()
+		active = not active
+		
+		local targetPos = active and 0.6 or 0.1
+		local targetColor = active and Color3.fromRGB(60, 120, 255) or Color3.fromRGB(50, 50, 60)
+		
+		createTween(toggleCircle, {Position = UDim2.new(targetPos, 0, 0.5, -9)}, 0.2):Play()
+		createTween(toggleBtn, {BackgroundColor3 = targetColor}, 0.2):Play()
+		
+		callback(active)
+	end)
+	
+	return toggleBtn
+end
+
+-- Função para criar slider moderno
+local function createSlider(parent, text, yOffset, minVal, maxVal, defaultVal, callback)
+	local sliderFrame = Instance.new("Frame")
+	sliderFrame.Size = UDim2.new(1, -70, 0, 50)
+	sliderFrame.Position = UDim2.new(0, 60, 0, yOffset)
+	sliderFrame.BackgroundTransparency = 1
+	sliderFrame.Parent = parent
+	
+	local sliderText = Instance.new("TextLabel")
+	sliderText.Size = UDim2.new(0.7, 0, 0, 20)
+	sliderText.BackgroundTransparency = 1
+	sliderText.Text = text
+	sliderText.Font = Enum.Font.Gotham
+	sliderText.TextSize = 14
+	sliderText.TextColor3 = Color3.fromRGB(200, 200, 200)
+	sliderText.TextXAlignment = Enum.TextXAlignment.Left
+	sliderText.Parent = sliderFrame
+	
+	local valueLabel = Instance.new("TextLabel")
+	valueLabel.Size = UDim2.new(0.3, 0, 0, 20)
+	valueLabel.Position = UDim2.new(0.7, 0, 0, 0)
+	valueLabel.BackgroundTransparency = 1
+	valueLabel.Text = tostring(defaultVal)
+	valueLabel.Font = Enum.Font.GothamBold
+	valueLabel.TextSize = 14
+	valueLabel.TextColor3 = Color3.fromRGB(60, 120, 255)
+	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+	valueLabel.Parent = sliderFrame
+	
+	local sliderBg = Instance.new("Frame")
+	sliderBg.Size = UDim2.new(1, 0, 0, 6)
+	sliderBg.Position = UDim2.new(0, 0, 0, 30)
+	sliderBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+	sliderBg.Parent = sliderFrame
+	style(sliderBg, 3)
+	
+	local sliderFill = Instance.new("Frame")
+	sliderFill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
+	sliderFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+	sliderFill.BorderSizePixel = 0
+	sliderFill.Parent = sliderBg
+	style(sliderFill, 3)
+	
+	local dragButton = Instance.new("TextButton")
+	dragButton.Size = UDim2.new(1, 0, 1, 0)
+	dragButton.BackgroundTransparency = 1
+	dragButton.Text = ""
+	dragButton.Parent = sliderBg
+	
+	local value = defaultVal
+	local dragging = false
+	
+	dragButton.MouseButton1Down:Connect(function()
+		dragging = true
+	end)
+	
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local mousePos = UserInputService:GetMouseLocation()
+			local absPos = sliderBg.AbsolutePosition
+			local absSize = sliderBg.AbsoluteSize
+			
+			local relativeX = math.clamp(mousePos.X - absPos.X, 0, absSize.X)
+			local percent = relativeX / absSize.X
+			
+			value = minVal + (maxVal - minVal) * percent
+			value = math.floor(value * 10) / 10
+			sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+			valueLabel.Text = tostring(value)
+			callback(value)
+		end
+	end)
+	
+	return sliderFrame
+end
+
+-- ===== POPULAR PÁGINA PRINCIPAL =====
+local yPos = 10
+
+-- Card Bem-vindo
+local welcomeCard = Instance.new("Frame")
+welcomeCard.Size = UDim2.new(0.9, 0, 0, 100)
+welcomeCard.Position = UDim2.new(0.05, 0, 0, yPos)
+welcomeCard.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+welcomeCard.Parent = mainPage
+style(welcomeCard, 15)
+addStroke(welcomeCard, 1, Color3.fromRGB(60, 120, 255), 0.8)
+
+local welcomeIcon = Instance.new("ImageLabel")
+welcomeIcon.Size = UDim2.new(0, 50, 0, 50)
+welcomeIcon.Position = UDim2.new(0, 20, 0.5, -25)
+welcomeIcon.BackgroundTransparency = 1
+welcomeIcon.Image = "rbxassetid://4483345998"
+welcomeIcon.ImageColor3 = Color3.fromRGB(60, 120, 255)
+welcomeIcon.Parent = welcomeCard
+
+local welcomeTitle = Instance.new("TextLabel")
+welcomeTitle.Size = UDim2.new(0.7, -70, 0, 25)
+welcomeTitle.Position = UDim2.new(0, 80, 0, 20)
+welcomeTitle.BackgroundTransparency = 1
+welcomeTitle.Text = "Bem-vindo, " .. player.Name
+welcomeTitle.Font = Enum.Font.GothamBold
+welcomeTitle.TextSize = 18
+welcomeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+welcomeTitle.TextXAlignment = Enum.TextXAlignment.Left
+welcomeTitle.Parent = welcomeCard
+
+local welcomeSub = Instance.new("TextLabel")
+welcomeSub.Size = UDim2.new(0.7, -70, 0, 20)
+welcomeSub.Position = UDim2.new(0, 80, 0, 45)
+welcomeSub.BackgroundTransparency = 1
+welcomeSub.Text = "Selecione uma aba para começar"
+welcomeSub.Font = Enum.Font.Gotham
+welcomeSub.TextSize = 12
+welcomeSub.TextColor3 = Color3.fromRGB(150, 150, 150)
+welcomeSub.TextXAlignment = Enum.TextXAlignment.Left
+welcomeSub.Parent = welcomeCard
+
+yPos = yPos + 110
+
+-- Status Card
+local statusCard = Instance.new("Frame")
+statusCard.Size = UDim2.new(0.9, 0, 0, 80)
+statusCard.Position = UDim2.new(0.05, 0, 0, yPos)
+statusCard.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+statusCard.Parent = mainPage
+style(statusCard, 12)
+addStroke(statusCard, 1, Color3.fromRGB(60, 120, 255), 0.9)
+
+local statusIcon = Instance.new("ImageLabel")
+statusIcon.Size = UDim2.new(0, 30, 0, 30)
+statusIcon.Position = UDim2.new(0, 15, 0.5, -15)
+statusIcon.BackgroundTransparency = 1
+statusIcon.Image = "rbxassetid://3926307379"
+statusIcon.ImageColor3 = Color3.fromRGB(60, 120, 255)
+statusIcon.Parent = statusCard
+
+local statusTitle = Instance.new("TextLabel")
+statusTitle.Size = UDim2.new(0.5, -50, 0, 20)
+statusTitle.Position = UDim2.new(0, 55, 0, 15)
+statusTitle.BackgroundTransparency = 1
+statusTitle.Text = "Status do Sistema"
+statusTitle.Font = Enum.Font.GothamBold
+statusTitle.TextSize = 16
+statusTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusTitle.TextXAlignment = Enum.TextXAlignment.Left
+statusTitle.Parent = statusCard
+
+local statusText = Instance.new("TextLabel")
+statusText.Size = UDim2.new(0.5, -50, 0, 20)
+statusText.Position = UDim2.new(0, 55, 0, 40)
+statusText.BackgroundTransparency = 1
+statusText.Text = "Todos os sistemas inativos"
+statusText.Font = Enum.Font.Gotham
+statusText.TextSize = 12
+statusText.TextColor3 = Color3.fromRGB(150, 150, 150)
+statusText.TextXAlignment = Enum.TextXAlignment.Left
+statusText.Parent = statusCard
+
+-- ===== POPULAR PÁGINA DE GRÁFICOS =====
+yPos = 10
+
+-- Card Ultra Low Poly
+local ultraCard = Instance.new("Frame")
+ultraCard.Size = UDim2.new(0.9, 0, 0, 80)
+ultraCard.Position = UDim2.new(0.05, 0, 0, yPos)
+ultraCard.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+ultraCard.Parent = graphicsPage
+style(ultraCard, 12)
+addStroke(ultraCard, 1, Color3.fromRGB(60, 120, 255), 0.9)
+
+local ultraIcon = Instance.new("ImageLabel")
+ultraIcon.Size = UDim2.new(0, 35, 0, 35)
+ultraIcon.Position = UDim2.new(0, 15, 0.5, -17)
+ultraIcon.BackgroundTransparency = 1
+ultraIcon.Image = "rbxassetid://3926307379"
+ultraIcon.ImageColor3 = Color3.fromRGB(60, 120, 255)
+ultraIcon.Parent = ultraCard
+
+local ultraTitle = Instance.new("TextLabel")
+ultraTitle.Size = UDim2.new(0.5, -50, 0, 20)
+ultraTitle.Position = UDim2.new(0, 60, 0, 15)
+ultraTitle.BackgroundTransparency = 1
+ultraTitle.Text = "Ultra Low Poly"
+ultraTitle.Font = Enum.Font.GothamBold
+ultraTitle.TextSize = 16
+ultraTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ultraTitle.TextXAlignment = Enum.TextXAlignment.Left
+ultraTitle.Parent = ultraCard
+
+local ultraDesc = Instance.new("TextLabel")
+ultraDesc.Size = UDim2.new(0.5, -50, 0, 20)
+ultraDesc.Position = UDim2.new(0, 60, 0, 40)
+ultraDesc.BackgroundTransparency = 1
