@@ -1,0 +1,252 @@
+-- 🔥 REBELDE X DRYX HUB V3 INSANO
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegomama"
+
+-- =========================
+-- 🎮 GUI BASE
+-- =========================
+
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- =========================
+-- 🔒 LOGIN FRAME
+-- =========================
+
+local loginFrame = Instance.new("Frame")
+loginFrame.Size = UDim2.new(0,0,0,0)
+loginFrame.Position = UDim2.new(0.5,0,0.5,0)
+loginFrame.AnchorPoint = Vector2.new(0.5,0.5)
+loginFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+loginFrame.Parent = gui
+loginFrame.Active = true
+loginFrame.Draggable = true
+Instance.new("UICorner", loginFrame).CornerRadius = UDim.new(0,15)
+
+-- animação abrir suave
+TweenService:Create(loginFrame,TweenInfo.new(0.4,Enum.EasingStyle.Quad),{
+	Size = UDim2.new(0,380,0,230)
+}):Play()
+
+-- Título
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,50)
+title.BackgroundTransparency = 1
+title.Text = "REBELDE X DRYX"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 26
+title.Parent = loginFrame
+
+-- RGB animado
+task.spawn(function()
+	while true do
+		for i=0,1,0.01 do
+			title.TextColor3 = Color3.fromHSV(i,1,1)
+			task.wait()
+		end
+	end
+end)
+
+-- Caixa senha
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(0.8,0,0,45)
+box.Position = UDim2.new(0.1,0,0.45,0)
+box.PlaceholderText = "Digite a senha..."
+box.BackgroundColor3 = Color3.fromRGB(35,35,35)
+box.TextColor3 = Color3.new(1,1,1)
+box.Font = Enum.Font.Gotham
+box.TextSize = 18
+box.Parent = loginFrame
+Instance.new("UICorner", box)
+
+-- Botão login
+local loginBtn = Instance.new("TextButton")
+loginBtn.Size = UDim2.new(0.6,0,0,40)
+loginBtn.Position = UDim2.new(0.2,0,0.75,0)
+loginBtn.Text = "LOGIN"
+loginBtn.Font = Enum.Font.GothamBold
+loginBtn.TextSize = 16
+loginBtn.Parent = loginFrame
+Instance.new("UICorner", loginBtn)
+
+-- =========================
+-- 🧠 HUB PRINCIPAL
+-- =========================
+
+local hubFrame = Instance.new("Frame")
+hubFrame.Size = UDim2.new(0,600,0,350)
+hubFrame.Position = UDim2.new(0.5,-300,0.5,-175)
+hubFrame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+hubFrame.Visible = false
+hubFrame.Parent = gui
+hubFrame.Active = true
+hubFrame.Draggable = true
+Instance.new("UICorner", hubFrame).CornerRadius = UDim.new(0,15)
+
+-- TopBar
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1,0,0,40)
+topBar.BackgroundColor3 = Color3.fromRGB(25,25,25)
+topBar.Parent = hubFrame
+Instance.new("UICorner", topBar)
+
+-- Título
+local hubTitle = Instance.new("TextLabel")
+hubTitle.Size = UDim2.new(1,0,1,0)
+hubTitle.BackgroundTransparency = 1
+hubTitle.Text = "REBELDE X DRYX HUB"
+hubTitle.Font = Enum.Font.GothamBold
+hubTitle.TextSize = 18
+hubTitle.Parent = topBar
+
+-- Botão minimizar
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0,40,0,30)
+minimizeBtn.Position = UDim2.new(1,-90,0,5)
+minimizeBtn.Text = "-"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
+minimizeBtn.Parent = topBar
+Instance.new("UICorner", minimizeBtn)
+
+-- Botão fechar
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0,40,0,30)
+closeBtn.Position = UDim2.new(1,-45,0,5)
+closeBtn.Text = "X"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+closeBtn.Parent = topBar
+Instance.new("UICorner", closeBtn)
+
+-- Aba Performance
+local performanceFrame = Instance.new("Frame")
+performanceFrame.Size = UDim2.new(1,-20,1,-60)
+performanceFrame.Position = UDim2.new(0,10,0,50)
+performanceFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+performanceFrame.Parent = hubFrame
+Instance.new("UICorner", performanceFrame)
+
+local boostBtn = Instance.new("TextButton")
+boostBtn.Size = UDim2.new(0,250,0,50)
+boostBtn.Position = UDim2.new(0.5,-125,0.3,0)
+boostBtn.Text = "ATIVAR FPS BOOST"
+boostBtn.Font = Enum.Font.GothamBold
+boostBtn.TextSize = 18
+boostBtn.Parent = performanceFrame
+Instance.new("UICorner", boostBtn)
+
+-- =========================
+-- 📊 FPS COUNTER
+-- =========================
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0,120,0,30)
+fpsLabel.Position = UDim2.new(0,10,0,10)
+fpsLabel.BackgroundColor3 = Color3.new(0,0,0)
+fpsLabel.TextColor3 = Color3.new(0,1,0)
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.TextSize = 16
+fpsLabel.Visible = false
+fpsLabel.Parent = gui
+Instance.new("UICorner", fpsLabel)
+
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	if tick() - lastTime >= 1 then
+		fpsLabel.Text = "FPS: "..frames
+		frames = 0
+		lastTime = tick()
+	end
+end)
+
+-- =========================
+-- 🚀 FPS BOOST
+-- =========================
+
+local function ativarBoost()
+
+	pcall(function()
+		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+	end)
+
+	Lighting.GlobalShadows = false
+	Lighting.FogEnd = 1e9
+	Lighting.Brightness = 2
+
+	for _,v in pairs(Lighting:GetChildren()) do
+		if v:IsA("PostEffect") then
+			v:Destroy()
+		end
+	end
+
+	for _,obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("ParticleEmitter")
+		or obj:IsA("Trail")
+		or obj:IsA("Smoke")
+		or obj:IsA("Fire")
+		or obj:IsA("Sparkles") then
+			obj.Enabled = false
+		end
+	end
+
+	fpsLabel.Visible = true
+	boostBtn.Text = "BOOST ATIVADO"
+end
+
+boostBtn.MouseButton1Click:Connect(ativarBoost)
+
+-- =========================
+-- 🔑 LOGIN
+-- =========================
+
+loginBtn.MouseButton1Click:Connect(function()
+	if box.Text == SENHA_CORRETA then
+		
+		-- animação fechar login
+		TweenService:Create(loginFrame,TweenInfo.new(0.3),{
+			Size = UDim2.new(0,0,0,0)
+		}):Play()
+		
+		task.wait(0.3)
+		loginFrame.Visible = false
+		hubFrame.Visible = true
+		
+	else
+		loginBtn.Text = "SENHA ERRADA"
+		task.wait(1)
+		loginBtn.Text = "LOGIN"
+	end
+end)
+
+-- =========================
+-- ❌ BOTÕES
+-- =========================
+
+closeBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+local minimized = false
+
+minimizeBtn.MouseButton1Click:Connect(function()
+	if not minimized then
+		performanceFrame.Visible = false
+		hubFrame.Size = UDim2.new(0,600,0,40)
+		minimized = true
+	else
+		performanceFrame.Visible = true
+		hubFrame.Size = UDim2.new(0,600,0,350)
+		minimized = false
+	end
+end)
