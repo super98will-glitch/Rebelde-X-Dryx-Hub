@@ -1,0 +1,191 @@
+-- 🌌 REBELDE X DRYX HUB - ZERO TWO EDITION 🌌
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"
+
+-- ===== CONFIGURAÇÃO ZERO TWO =====
+local ZERO_TWO_IMG = "rbxassetid://11414416593" -- ID de alta qualidade da Zero Two
+local Theme = {
+	Background = Color3.fromRGB(20, 10, 15), -- Fundo levemente avermelhado
+	Sidebar = Color3.fromRGB(0, 0, 0),
+	Accent = Color3.fromRGB(255, 85, 127), -- Rosa Zero Two
+	Text = Color3.fromRGB(255, 255, 255),
+	Button = Color3.fromRGB(45, 20, 30)
+}
+
+-- Limpeza
+if player.PlayerGui:FindFirstChild("ZeroTwoHub") then player.PlayerGui.ZeroTwoHub:Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "ZeroTwoHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function applyDesign(obj, radius, stroke)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 8)
+	corner.Parent = obj
+	if stroke then
+		local s = Instance.new("UIStroke")
+		s.Color = Theme.Accent
+		s.Thickness = 1.5
+		s.Transparency = 0.3
+		s.Parent = obj
+	end
+end
+
+-- ================= LOGIN ESTILIZADO =================
+local login = Instance.new("Frame")
+login.Size = UDim2.new(0, 350, 0, 250)
+login.Position = UDim2.new(0.5, -175, 0.5, -125)
+login.BackgroundColor3 = Theme.Background
+login.Parent = gui
+applyDesign(login, 15, true)
+
+local bgLogin = Instance.new("ImageLabel")
+bgLogin.Size = UDim2.new(1, 0, 1, 0)
+bgLogin.Image = ZERO_TWO_IMG
+bgLogin.ImageTransparency = 0.6
+bgLogin.BackgroundTransparency = 1
+bgLogin.ScaleType = Enum.ScaleType.Crop
+bgLogin.Parent = login
+applyDesign(bgLogin, 15)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "Darling Login"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Theme.Accent
+title.BackgroundTransparency = 1
+title.Parent = login
+
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(0.8, 0, 0, 45)
+box.Position = UDim2.new(0.1, 0, 0.4, 0)
+box.PlaceholderText = "Senha do Darling..."
+box.Text = ""
+box.BackgroundColor3 = Color3.new(0,0,0)
+box.BackgroundTransparency = 0.4
+box.TextColor3 = Color3.new(1,1,1)
+box.Parent = login
+applyDesign(box, 10, true)
+
+local enter = Instance.new("TextButton")
+enter.Size = UDim2.new(0.8, 0, 0, 45)
+enter.Position = UDim2.new(0.1, 0, 0.7, 0)
+enter.Text = "CONECTAR"
+enter.BackgroundColor3 = Theme.Accent
+enter.TextColor3 = Color3.new(1,1,1)
+enter.Font = Enum.Font.GothamBold
+enter.Parent = login
+applyDesign(enter, 10)
+
+-- ================= MAIN HUB (DASHBOARD) =================
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 600, 0, 380)
+main.Position = UDim2.new(0.5, -300, 0.5, -190)
+main.BackgroundColor3 = Theme.Background
+main.Visible = false
+main.Parent = gui
+applyDesign(main, 12, true)
+
+-- IMAGEM DE FUNDO PRINCIPAL
+local bgMain = Instance.new("ImageLabel")
+bgMain.Size = UDim2.new(1, 0, 1, 0)
+bgMain.Image = ZERO_TWO_IMG
+bgMain.ImageTransparency = 0.7 -- Ajuste para ver mais/menos a Zero Two
+bgMain.BackgroundTransparency = 1
+bgMain.ScaleType = Enum.ScaleType.Crop
+bgMain.Parent = main
+applyDesign(bgMain, 12)
+
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 160, 1, 0)
+sidebar.BackgroundColor3 = Color3.new(0, 0, 0)
+sidebar.BackgroundTransparency = 0.6
+sidebar.Parent = main
+applyDesign(sidebar, 12)
+
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -180, 1, -20)
+container.Position = UDim2.new(0, 170, 0, 10)
+container.BackgroundTransparency = 1
+container.Parent = main
+
+-- Perfil na Sidebar
+local profile = Instance.new("ImageLabel")
+profile.Size = UDim2.new(0, 50, 0, 50)
+profile.Position = UDim2.new(0.5, -25, 1, -70)
+profile.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+profile.Parent = sidebar
+applyDesign(profile, 100, true)
+
+-- Sistema de Abas
+local function createTab(name, order)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(0.9, 0, 0, 40)
+	b.Position = UDim2.new(0.05, 0, 0, 20 + (order * 45))
+	b.Text = name
+	b.BackgroundColor3 = Theme.Accent
+	b.BackgroundTransparency = 0.8
+	b.TextColor3 = Theme.Text
+	b.Font = Enum.Font.GothamSemibold
+	b.Parent = sidebar
+	applyDesign(b, 8)
+	
+	local p = Instance.new("ScrollingFrame")
+	p.Size = UDim2.new(1, 0, 1, 0)
+	p.Visible = false
+	p.BackgroundTransparency = 1
+	p.ScrollBarThickness = 0
+	p.Parent = container
+	
+	local l = Instance.new("UIListLayout")
+	l.Padding = UDim.new(0, 10)
+	l.Parent = p
+	
+	b.MouseButton1Click:Connect(function()
+		for _, v in pairs(container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
+		p.Visible = true
+	end)
+	return p
+end
+
+local perfTab = createTab("Performance", 0)
+local skyTab = createTab("Sky Visual", 1)
+
+-- ================= BOTÕES DE EXEMPLO =================
+local function addAction(txt, func, parent)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -10, 0, 45)
+	btn.BackgroundColor3 = Theme.Button
+	btn.BackgroundTransparency = 0.2
+	btn.Text = txt
+	btn.TextColor3 = Theme.Text
+	btn.Font = Enum.Font.Gotham
+	btn.Parent = parent
+	applyDesign(btn, 8, true)
+	btn.MouseButton1Click:Connect(func)
+end
+
+addAction("Ultra Low Poly", function() 
+	Lighting.GlobalShadows = false
+	print("Otimizado!") 
+end, perfTab)
+
+-- ================= LÓGICA DE LOGIN =================
+enter.MouseButton1Click:Connect(function()
+	if box.Text == SENHA_CORRETA then
+		login:TweenPosition(UDim2.new(0.5, -175, 1.5, 0), "In", "Back", 0.5)
+		task.wait(0.5)
+		login.Visible = false
+		main.Visible = true
+		main.Size = UDim2.new(0, 0, 0, 0)
+		main:TweenSize(UDim2.new(0, 600, 0, 380), "Out", "Back", 0.5)
+	end
+end)
